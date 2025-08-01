@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as authService from '../../api/authService';
+import { useAuthContext } from './AuthContext';
 import './AuthForm.css';
 
-const AuthPage = () => {
+const AuthForm = () => {
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const { userInfo, storeLoginInfo } = useAuthContext();
 
     // A single state object to hold all form data
     const [formData, setFormData] = useState({
@@ -15,6 +18,18 @@ const AuthPage = () => {
         lastName: '',
         contact: '',
     });
+
+    // Form starts in login mode by default, so we retrieve the username
+    // of the user previously logged in if it exists, when the context loads
+    useEffect(() => {
+        // Prefill the field if userInfo is not null
+        if (userInfo) {
+            setFormData(prevData => ({
+                ...prevData,
+                username: userInfo.basic_info.username
+            }));
+        }
+    }, [userInfo]); // Runs when userInfo changes
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
@@ -60,8 +75,8 @@ const AuthPage = () => {
 
                 ({ token, userInfo } = await authService.register(registrationData));
             }
-
-            //TODO: store token and user info in localStorage and global authentication context
+            
+            storeLoginInfo(token, userInfo)
         } catch (err) {
             setError(err.message || 'An unexpected error occurred.');
         } finally {
@@ -151,4 +166,4 @@ const AuthPage = () => {
     );
 };
 
-export default AuthPage;
+export default AuthForm;
