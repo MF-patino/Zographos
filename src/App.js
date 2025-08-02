@@ -1,17 +1,17 @@
 import React from 'react';
-import AuthForm from './components/auth/AuthForm';
+import AppDisplayer from './components/AppDisplayer';
 import { AuthProvider } from './components/auth/AuthContext';
+import Header from './components/layout/Header';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
       <div className="App">
-        <header className="App-header">
-          <h1>Zōgraphos</h1>
-        </header>
+        <Header />
+
         <main>
-          <AuthForm />
+          <AppDisplayer />
         </main>
       </div>
     </AuthProvider>

@@ -1,0 +1,101 @@
+/* --- Default state configuration, for when user is not logged in --- */
+
+.App-header {
+    background-color: #282c34;
+    height: 150px;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+}
+
+.header-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* The logo starts in the center of the screen */
+.logo-container {
+    position: relative;
+    font-size: 3rem;
+    font-weight: bold;
+    
+    /* This starts it in the center:
+       - 50vw: center of the viewport
+       - 50%: minus half of the element's own width
+       - 40px: minus the header's padding
+    */
+    transform: translateX(calc(50vw - 50% - 40px));
+    transition: transform 0.5s ease-in-out;
+}
+
+.logo-text-initial{
+    opacity: 1; /* Fully visible by default */
+    font-weight: 600;
+    color: white;
+    /* Animate the fade out */
+    transition: opacity 0.4s ease-in-out;
+}
+
+.logo-text-final {
+    opacity: 0; /* Fully transparent by default */
+    width: 0;
+    color: #61dafb;
+    /* Smooth transition for the cross-fade */
+    transition: opacity 0.4s ease-in-out;
+}
+
+.logout-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #282c34;
+    background-color: #f9af56;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    right: 0;
+
+    /* Hide the button by default */
+    opacity: 0;
+    transform: scale(0.8); /* Start slightly smaller for a pop-in effect */
+    pointer-events: none; /* Make it unclickable when invisible */
+    
+    /* Animate its appearance with a slight delay */
+    transition: opacity 0.3s ease-in-out 0.2s, transform 0.3s ease-in-out 0.2s;
+}
+
+
+/* --- Logged-In State --- */
+/* The class suffix ".logged-in" gets added to the header when the user is authenticated */
+
+.App-header.logged-in {
+    /* Thinner height */
+    height: 60px; 
+}
+
+.App-header.logged-in .logo-container {
+    /* Move the logo to the far left (its natural position) */
+    transform: translateX(0);
+}
+
+/* Fade out the initial text */
+.App-header.logged-in .logo-text-initial{
+    opacity: 0;
+    width: 0;
+}
+
+/* And fade in the final logo */
+.App-header.logged-in .logo-text-final {
+    opacity: 1;
+}
+
+.App-header.logged-in .logout-btn {
+    /* Make the logout button appear */
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto; /* Make it clickable again */
+}
