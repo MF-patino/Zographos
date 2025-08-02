@@ -16,7 +16,7 @@ const Header = () => {
                 <div className="logo-container">
                     {/* The final "ΖΩ" logo, hidden by default */}
                     <span className="logo-text-final">ΖΩ</span>
-                    {/* The initial "Zō" text */}
+                    {/* The initial "Zōgraphos" text */}
                     <span className="logo-text-initial">Zōgraphos</span>
                 </div>
 
