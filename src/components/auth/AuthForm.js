@@ -10,14 +10,19 @@ const AuthForm = () => {
 
     const { userInfo, storeLoginInfo } = useAuthContext();
 
+    const formEntries = [
+        {name: "username", type: 'text', title: 'Username', registerOnly: false},
+        {name: "firstName", type: 'text', title: 'First name', registerOnly: true},
+        {name: "lastName", type: 'text', title: 'Last name', registerOnly: true},
+        {name: "contact", type: 'email', title: 'Contact email', registerOnly: true},
+        {name: "password", type: 'password', title: 'Password', registerOnly: false},
+    ]
+
+    const entryStateObject = {}
+    formEntries.map((entry) => entryStateObject[entry.name] = '')
+    
     // A single state object to hold all form data
-    const [formData, setFormData] = useState({
-        username: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        contact: '',
-    });
+    const [formData, setFormData] = useState(entryStateObject);
 
     // Form starts in login mode by default, so we retrieve the username
     // of the user previously logged in if it exists, when the context loads
@@ -83,74 +88,30 @@ const AuthForm = () => {
             setIsLoading(false);
         }
     };
+    
+    function createEntry(entry){
+        if (isLoginMode && entry.registerOnly)
+            return null
 
+        return <div key={entry.name} className="form-group">
+                    <label htmlFor={entry.name}>{entry.title}</label>
+                    <input
+                        type={entry.type}
+                        id={entry.name}
+                        name={entry.name}
+                        required
+                        value={formData[entry.name]}
+                        onChange={handleInputChange}
+                    />
+                </div>
+    }
     return (
         <div className="auth-container">
             <form className="auth-form" onSubmit={submitHandler}>
                 <h2>{isLoginMode ? 'Login' : 'Register'} details</h2>
 
                 {/* Fields for both login and register functionality */}
-                <div className="form-group">
-                    <label htmlFor="username">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                        value={formData.username}
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange}
-                    />
-                </div>
-
-                {/* Fields only for registering */}
-                {!isLoginMode && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="firstName">First Name</label>
-                            <input
-                                type="text"
-                                id="firstName"
-                                name="firstName"
-                                required
-                                value={formData.firstName}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="lastName">Last Name</label>
-                            <input
-                                type="text"
-                                id="lastName"
-                                name="lastName"
-                                required
-                                value={formData.lastName}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="contact">Email / Contact</label>
-                            <input
-                                type="email"
-                                id="contact"
-                                name="contact"
-                                required
-                                value={formData.contact}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                    </>
-                )}
+                {formEntries.map((entry) => createEntry(entry))}
 
                 {error && <p className="error-text">{error}</p>}
 
