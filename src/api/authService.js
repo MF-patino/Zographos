@@ -52,3 +52,28 @@ export const login = async (loginData) => {
     const token = response.headers.get('Authorization');
     return { token, userInfo };
 };
+
+/**
+ * This operation changes user information:
+ * - If the 'infoData' DTO contains a password field, only the user password will change.
+ * - Else, only the rest of the user information will change (e.g. username, first name, etc.).
+ * @param {string} username - The current username.
+ * @param {object} infoData - The information data the user wishes to change.
+ * @param {string} token - The JWT authentication token.
+ */
+export const editInfo = async (username, infoData, token) => {
+    // The login endpoint is /user
+    const response = await fetch(`${API_URL}/user/` + username, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(infoData),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Could not change user info.');
+    }
+};

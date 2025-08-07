@@ -48,12 +48,9 @@
     transition: opacity 0.4s ease-in-out;
 }
 
-.logout-btn {
-    padding: 10px 20px;
-    font-size: 1rem;
+.profile-btn {
+    font-size: 0.7rem;
     font-weight: bold;
-    color: #282c34;
-    background-color: #f9af56;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -61,7 +58,7 @@
 
     /* Hide the button by default */
     opacity: 0;
-    transform: scale(0.8); /* Start slightly smaller for a pop-in effect */
+    transform: scale(1.8); /* Start slightly smaller for a pop-in effect */
     pointer-events: none; /* Make it unclickable when invisible */
     
     /* Animate its appearance with a slight delay */
@@ -93,9 +90,9 @@
     opacity: 1;
 }
 
-.App-header.logged-in .logout-btn {
-    /* Make the logout button appear */
+.App-header.logged-in .profile-btn {
+    /* Make the profile button appear */
     opacity: 1;
-    transform: scale(1);
+    transform: scale(2);
     pointer-events: auto; /* Make it clickable again */
 }

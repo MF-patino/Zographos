@@ -83,7 +83,8 @@ const AuthForm = () => {
             
             storeLoginInfo(token, userInfo)
         } catch (err) {
-            setError(err.message || 'An unexpected error occurred.');
+            const jsonError = JSON.parse(err.message)
+            setError(jsonError.message || 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }
