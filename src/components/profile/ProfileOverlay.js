@@ -8,6 +8,7 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isPasswordMode, setIsPasswordMode] = useState(false);
 
     const { userInfo, token, deleteLoginInfo, storeLoginInfo } = useAuthContext();
 
@@ -18,10 +19,21 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
         {name: "contact", type: 'email', title: 'Contact email:'},
     ]
 
-    const entryStateObject = {}
-    formEntries.map((entry) => entryStateObject[entry.name] = '')
-    
-    const [formData, setFormData] = useState(entryStateObject);
+    const passwordFormEntries = [
+        {name: "password", type: 'password', title: 'New password:'},
+        {name: "repeat", type: 'password', title: 'Repeat password:'},
+    ]
+
+    function getEntryStateObject(entries){
+        const entryStateObject = {}
+        entries.map((entry) => entryStateObject[entry.name] = '')
+
+        return entryStateObject
+    }
+
+    const [formData, setFormData] = useState(getEntryStateObject(formEntries));
+
+    const [passwordFormData, setPasswordFormData] = useState(getEntryStateObject(passwordFormEntries));
 
     useEffect(() => {
         // Prefill the fields if userInfo is not null
@@ -41,19 +53,37 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
     // Logout needs to close this overlay first, as it has a dependency on userInfo
     const handleLogout = () => {onClose(); deleteLoginInfo();};
 
-
     const handleInputChange = (event) => {
         const { name, value } = event.target;
+        isEditMode ?
         setFormData(prevData => ({
+            ...prevData,
+            [name]: value,
+        })) :
+        setPasswordFormData(prevData => ({
             ...prevData,
             [name]: value,
         }));
     };
 
-    const switchModeHandler = () => {
+    const switchEditModeHandler = () => {
         setIsEditMode(prevMode => !prevMode);
+        setIsPasswordMode(false);
         setError(null); // Clear errors when switching modes
-        setFormData(() => (userInfo.basic_info)); // Restart field values
+
+         // Restart field values
+        setFormData(() => (userInfo.basic_info));
+        setPasswordFormData(() => (getEntryStateObject(passwordFormEntries)));
+    };
+
+    const switchPasswordModeHandler = () => {
+        setIsPasswordMode(prevMode => !prevMode);
+        setIsEditMode(false);
+        setError(null); // Clear errors when switching modes
+
+         // Restart field values
+        setFormData(() => (userInfo.basic_info));
+        setPasswordFormData(() => (getEntryStateObject(passwordFormEntries)));
     };
 
     const submitHandler = async (event) => {
@@ -61,41 +91,52 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const data = {
-                basic_info: formData,
-            };
+            if (isPasswordMode && (passwordFormData.password !== passwordFormData.repeat))
+                throw new Error("The new and repeated password fields do not coincide.")
 
+            const data = isEditMode ? {basic_info: formData,} : {password: passwordFormData.password,};
             await authService.editInfo(userInfo.basic_info.username, data, token);
-            if (userInfo.basic_info.username !== formData.username){ // username change
-                alert("Username changes require logging out.")
-                handleLogout();
-            } else{
-                const newUserInfo = userInfo
-                newUserInfo.basic_info = formData
 
-                storeLoginInfo(token, newUserInfo)
-                switchModeHandler()
-            }
+            if (isEditMode){
+                // username change requires a logout due to the JWT authentication
+                // as the JWT of a user contains their username
+                if (userInfo.basic_info.username !== formData.username){
+                    alert("Username changes require logging out.")
+                    handleLogout();
+                } else {
+                    const newUserInfo = userInfo
+                    newUserInfo.basic_info = formData
+
+                    storeLoginInfo(token, newUserInfo)
+                    switchEditModeHandler()
+                }
+            } else if (isPasswordMode)
+                switchPasswordModeHandler()
+            
         } catch (err) {
-            const jsonError = JSON.parse(err.message)
-            setError(jsonError.message || 'An unexpected error occurred.');
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+
+            setError(finalError.message || 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }
     }
 
-    function createEntry(entry){
+    function createEntry(entry, data){
         return <span className="user-info-grid" key={entry.name}>
                     <b>{entry.title}</b>
-                    {isEditMode ?
+                    {// render form entries as inputs when in password or edit mode, else render as plain text
+                    (isEditMode || isPasswordMode) ?
                     <input
                         type={entry.type}
                         id={entry.name}
                         name={entry.name}
                         required
-                        value={formData[entry.name]}
+                        value={data[entry.name]}
                         onChange={handleInputChange}
-                    /> : <span>{formData[entry.name]}</span>}
+                        // check just in case to not show the passwords plainly
+                    /> : (!isPasswordMode && <span>{data[entry.name]}</span>)}
                 </span>
     }
 
@@ -109,13 +150,16 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                 <h3>Profile information</h3>
                 
                 <form onSubmit={submitHandler}>
-                    {formEntries.map((entry) => createEntry(entry))}
-                    {!isEditMode && 
+                    {isPasswordMode ?
+                    passwordFormEntries.map((entry) => createEntry(entry, passwordFormData)):
+                    formEntries.map((entry) => createEntry(entry, formData))}
+
+                    {!(isEditMode || isPasswordMode) && 
                     <span className="user-info-grid">
                         <b>Permissions: </b> <span className="permission-tag">{userInfo.permissions}</span> 
                     </span>}
 
-                    {isEditMode &&
+                    {(isEditMode || isPasswordMode) &&
                     <span>
                         <span className="error-text">{error}</span>
                         {/* Button for sending the request*/}
@@ -126,8 +170,8 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                 </form>
 
                 <div className="overlay-actions">
-                    <button className="action-btn" onClick={switchModeHandler}>Edit info</button>
-                    <button className="action-btn">Change password</button>
+                    <button className="action-btn" onClick={switchEditModeHandler}>Edit info</button>
+                    <button className="action-btn" onClick={switchPasswordModeHandler}>Change password</button>
                     <button className="action-btn logout" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
