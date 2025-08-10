@@ -16,6 +16,7 @@ const AuthForm = () => {
         {name: "lastName", type: 'text', title: 'Last name', registerOnly: true},
         {name: "contact", type: 'email', title: 'Contact email', registerOnly: true},
         {name: "password", type: 'password', title: 'Password', registerOnly: false},
+        {name: "repeat", type: 'password', title: 'Repeat the password', registerOnly: true},
     ]
 
     const entryStateObject = {}
@@ -68,6 +69,9 @@ const AuthForm = () => {
 
             } else {
                 // Registration logic
+                if (formData.password !== formData.repeat)
+                    throw new Error("The new and repeated password fields do not coincide.")
+
                 const registrationData = {
                     basic_info: {
                         username: formData.username,
