@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as authService from '../../api/authService';
 import { useAuthContext } from './AuthContext';
+import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './AuthForm.css';
 
 const AuthForm = () => {
@@ -109,6 +110,8 @@ const AuthForm = () => {
                         required
                         value={formData[entry.name]}
                         onChange={handleInputChange}
+                        minlength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
+                        maxlength={MAX_ENTRY_LENGTH}
                     />
                 </div>
     }

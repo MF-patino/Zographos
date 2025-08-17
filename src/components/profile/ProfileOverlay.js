@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../auth/AuthContext';
 import * as authService from '../../api/authService';
+import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './ProfileOverlay.css';
 
 // This component takes isOpen, onClose, and userInfo as props
@@ -135,6 +136,8 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                         required
                         value={data[entry.name]}
                         onChange={handleInputChange}
+                        minlength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
+                        maxlength={MAX_ENTRY_LENGTH}
                         // check just in case to not show the passwords plainly
                     /> : (!isPasswordMode && <span>{data[entry.name]}</span>)}
                 </span>
