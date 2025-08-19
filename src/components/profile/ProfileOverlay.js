@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../auth/AuthContext';
 import * as authService from '../../api/authService';
+import ConfirmationModal from '../common/ConfirmationModal';
 import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './ProfileOverlay.css';
 
 // This component takes isOpen, onClose, and userInfo as props
 const ProfileOverlay = ({ isOpen, onClose }) => {
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -53,6 +57,22 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
 
     // Logout needs to close this overlay first, as it has a dependency on userInfo
     const handleLogout = () => {onClose(); deleteLoginInfo();};
+
+    const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
+        setError(null);
+        try {
+            await authService.deleteProfile(userInfo.basic_info.username, token);
+            alert('Account deleted successfully.');
+            // After successful deletion, log the user out.
+            handleLogout(); 
+        } catch (err) {
+            setError(err.message || 'Failed to delete account.');
+        } finally {
+            setIsDeleting(false);
+            setIsConfirmModalOpen(false);
+        }
+    };
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
@@ -173,11 +193,29 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                 </form>
 
                 <div className="overlay-actions">
+                    {isEditMode && (
+                        <button 
+                            className="action-btn delete" 
+                            onClick={() => setIsConfirmModalOpen(true)}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete account'}
+                        </button>
+                    )}
                     <button className="action-btn" onClick={switchEditModeHandler}>Edit info</button>
                     <button className="action-btn" onClick={switchPasswordModeHandler}>Change password</button>
                     <button className="action-btn logout" onClick={handleLogout}>Logout</button>
                 </div>
             </div>
+
+            {/* Render the ConfirmationModal.*/}
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                title="Delete account"
+                message={`Are you absolutely sure you want to delete your account, ${userInfo.basic_info.username}? This action cannot be undone.`}
+                onConfirm={handleDeleteConfirm}
+                onCancel={() => setIsConfirmModalOpen(false)}
+            />
         </div>
     );
 };

@@ -62,7 +62,6 @@ export const login = async (loginData) => {
  * @param {string} token - The JWT authentication token.
  */
 export const editInfo = async (username, infoData, token) => {
-    // The login endpoint is /user
     const response = await fetch(`${API_URL}/user/` + username, {
         method: 'PUT',
         headers: {
@@ -75,5 +74,24 @@ export const editInfo = async (username, infoData, token) => {
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Could not change user info.');
+    }
+};
+
+/**
+ * This operation deletes a user profile.
+ * @param {string} username - The username of the user to delete.
+ * @param {string} token - The JWT authentication token.
+ */
+export const deleteProfile = async (username, token) => {
+    const response = await fetch(`${API_URL}/user/${username}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            // No 'Content-Type' needed for a DELETE request with no body
+        },
+    });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Could not delete user account.');
     }
 };

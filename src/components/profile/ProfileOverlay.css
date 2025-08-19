@@ -80,10 +80,16 @@
     font-weight: bold;
 }
 
-.action-btn.logout {
+.action-btn.delete {
     background-color: #dc3545;
     color: white;
     border-color: #dc3545;
+}
+
+.action-btn.logout {
+    background-color: #eb7029;
+    color: white;
+    border-color: #eb7029;
 }
 
 .error-text {
