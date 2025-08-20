@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../auth/AuthContext';
-import * as authService from '../../api/authService';
+import * as userService from '../../api/userService';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './ProfileOverlay.css';
@@ -62,7 +62,7 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
         setIsDeleting(true);
         setError(null);
         try {
-            await authService.deleteProfile(userInfo.basic_info.username, token);
+            await userService.deleteProfile(userInfo.basic_info.username, token);
             alert('Account deleted successfully.');
             // After successful deletion, log the user out.
             handleLogout(); 
@@ -116,7 +116,7 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                 throw new Error("The new and repeated password fields do not coincide.")
 
             const data = isEditMode ? {basic_info: formData,} : {password: passwordFormData.password,};
-            await authService.editInfo(userInfo.basic_info.username, data, token);
+            await userService.editInfo(userInfo.basic_info.username, data, token);
 
             if (isEditMode){
                 // username change requires a logout due to the JWT authentication

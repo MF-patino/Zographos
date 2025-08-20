@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as authService from '../../api/authService';
+import * as userService from '../../api/userService';
 import { useAuthContext } from './AuthContext';
 import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './AuthForm.css';
@@ -66,7 +66,7 @@ const AuthForm = () => {
                     password: formData.password,
                 };
 
-                ({ token, userInfo } = await authService.login(loginData));
+                ({ token, userInfo } = await userService.login(loginData));
 
             } else {
                 // Registration logic
@@ -83,7 +83,7 @@ const AuthForm = () => {
                     password: formData.password,
                 };
 
-                ({ token, userInfo } = await authService.register(registrationData));
+                ({ token, userInfo } = await userService.register(registrationData));
             }
             
             storeLoginInfo(token, userInfo)

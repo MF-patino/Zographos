@@ -57,7 +57,7 @@ export const login = async (loginData) => {
  * This operation changes user information:
  * - If the 'infoData' DTO contains a password field, only the user password will change.
  * - Else, only the rest of the user information will change (e.g. username, first name, etc.).
- * @param {string} username - The current username.
+ * @param {string} username - The username of the user to update.
  * @param {object} infoData - The information data the user wishes to change.
  * @param {string} token - The JWT authentication token.
  */
@@ -93,5 +93,28 @@ export const deleteProfile = async (username, token) => {
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Could not delete user account.');
+    }
+};
+
+
+/**
+ * This operation changes user permissions:
+ * @param {string} username - The username of the user whose permission level will change.
+ * @param {object} permissionData - The new permission level requested to be given to a user.
+ * @param {string} token - The JWT authentication token.
+ */
+export const changePermissions = async (username, permissionData, token) => {
+    const response = await fetch(`${API_URL}/permissions/` + username, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(permissionData),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Could not change user permissions.');
     }
 };
