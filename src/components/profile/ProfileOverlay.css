@@ -1,0 +1,109 @@
+.overlay-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.overlay-content {
+    background-color: white;
+    color: #333;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.overlay-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.overlay-content h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #282c34;
+}
+
+.user-info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 15px 20px;
+    margin: 25px 0;
+    align-items: center;
+}
+
+.permission-tag {
+    background-color: #e7e7e7;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    justify-self: center;
+}
+
+.overlay-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.action-btn {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.action-btn.delete {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.action-btn.logout {
+    background-color: #eb7029;
+    color: white;
+    border-color: #eb7029;
+}
+
+.error-text {
+    color: #dc3545;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 6px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #007bff;
+    color: white;
+}
