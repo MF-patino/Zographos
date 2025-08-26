@@ -1,0 +1,62 @@
+import { API_URL } from '../config/apiSettings';
+
+/**
+ * Fetches all available scrolls from the server.
+ * @param {string} token - The JWT authentication token.
+ * @returns {Promise<Array>} - A list of scroll objects.
+ */
+export const getAllScrolls = async (token) => {
+    const response = await fetch(`${API_URL}/scrolls`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to fetch scrolls.');
+    }
+
+    return response.json();
+};
+
+
+/**
+ * Creates a new scroll by uploading its metadata and ink image.
+ * @param {string} token - The JWT authentication token.
+ * @param {object} metadata - The scroll's metadata (displayName, description, etc.).
+ * @param {File} inkImage - The image file to upload.
+ * @returns {Promise<object>} - The newly created scroll object.
+ */
+export const createScroll = async (token, metadata, inkImage) => {
+    // Create a FormData object to build the multipart request
+    const formData = new FormData();
+
+    // Append the metadata as a JSON string Blob.
+    // The backend expects a part named "metadata".
+    const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
+    formData.append('metadata', metadataBlob);
+
+    // Append the image file.
+    // The backend expects a part named "ink_image".
+    formData.append('ink_image', inkImage);
+
+    // 4. Make the fetch request.
+    // The browser will automatically set the Content-Type header
+    // with the correct boundary.
+    const response = await fetch(`${API_URL}/scrolls`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to create scroll.');
+    }
+
+    return response.json();
+};

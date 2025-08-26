@@ -156,8 +156,8 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                         required
                         value={data[entry.name]}
                         onChange={handleInputChange}
-                        minlength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
-                        maxlength={MAX_ENTRY_LENGTH}
+                        minLength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
+                        maxLength={MAX_ENTRY_LENGTH}
                         // check just in case to not show the passwords plainly
                     /> : (!isPasswordMode && <span>{data[entry.name]}</span>)}
                 </span>

@@ -1,5 +1,4 @@
-// The base URL of the HerculaneumTranscriptor backend
-const API_URL = 'http://localhost:8080';
+import { API_URL } from '../config/apiSettings';
 
 /**
  * Registers a new user.
