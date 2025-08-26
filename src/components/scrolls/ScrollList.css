@@ -1,0 +1,73 @@
+.scroll-list {
+    display: grid;
+    /* This creates a responsive grid */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.scroll-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.scroll-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px B(0, 0, 0, 0.15);
+}
+
+.scroll-thumbnail {
+    width: 75%;
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+}
+
+.scroll-info {
+    padding: 15px;
+}
+
+.scroll-info h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.scroll-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* --- Styles for the "Add New Scroll" card --- */
+.add-card {
+    /* The discontinuous (dashed) line outline */
+    border: 3px dashed #cccccc;
+    box-shadow: none;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px; /* Give it a similar height to other cards */
+}
+
+.add-card:hover {
+    border-color: #007bff;
+    background-color: #e9ecef;
+}
+
+.add-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #888;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.add-card:hover .add-card-content {
+    color: #007bff;
+}

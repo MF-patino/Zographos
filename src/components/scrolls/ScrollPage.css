@@ -1,0 +1,15 @@
+.scrolls-page {
+    padding: 20px 40px;
+}
+
+.scrolls-page h2 {
+    margin-top: 0;
+}
+
+.scrolls-container {
+    margin-top: 20px;
+}
+
+.error-text {
+    color: #dc3545;
+}
