@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthContext } from '../auth/AuthContext';
 import { FaPlus } from 'react-icons/fa'; // Import the plus icon
+import { Link } from 'react-router-dom';
 import './ScrollList.css';
 
 // This is the "Add New" button for admins
@@ -36,17 +37,19 @@ const ScrollList = ({ scrolls, onAddClick }) => {
             
             {/* Map over the scrolls and render a card for each */}
             {scrolls.map(scroll => (
-                <div key={scroll.scrollId} className="scroll-card">
-                    <img 
-                        src={scroll.thumbnailUrl || '/images/default-scroll-thumbnail.png'}  
-                        onError={addDefaultSrc} alt={scroll.scrollId} className="scroll-thumbnail" 
-                    />
-                    
-                    <div className="scroll-info">
-                        <h3>{scroll.displayName}</h3>
-                        <p>{scroll.description}</p>
+                <Link to={`/scrolls/${scroll.scrollId}`} key={scroll.scrollId} className="scroll-card-link">
+                    <div key={scroll.scrollId} className="scroll-card">
+                        <img 
+                            src={scroll.thumbnailUrl || '/images/default-scroll-thumbnail.png'}  
+                            onError={addDefaultSrc} alt={scroll.scrollId} className="scroll-thumbnail" 
+                        />
+                        
+                        <div className="scroll-info">
+                            <h3>{scroll.displayName}</h3>
+                            <p>{scroll.description}</p>
+                        </div>
                     </div>
-                </div>
+                </Link>
             ))}
         </div>
     );

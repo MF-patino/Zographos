@@ -5,6 +5,11 @@
     gap: 20px;
 }
 
+.scroll-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
 .scroll-card {
     background-color: white;
     border-radius: 8px;

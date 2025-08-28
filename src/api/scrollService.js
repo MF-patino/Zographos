@@ -60,3 +60,46 @@ export const createScroll = async (token, metadata, inkImage) => {
 
     return response.json();
 };
+
+/**
+ * Deletes a scroll from the server.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll to delete.
+ * @returns {Promise<void>}
+ */
+export const deleteScroll = async (token, scrollId) => {
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to delete scroll.');
+    }
+
+    return;
+};
+
+/**
+ * Fetches a secured image as a Blob.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll whose image to fetch.
+ *- @returns {Promise<Blob>} - A promise that resolves to the image Blob.
+ */
+export const getScrollImageBlob = async (token, scrollId) => {
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch image. Status: ${response.status}`);
+    }
+
+    return response.blob();
+};
