@@ -81,6 +81,8 @@ const ProfileOverlay = ({ isOpen, onClose, otherUserInfo=null }) => {
             // After successful deletion, log the user out if it is the user being deleted.
             if (!otherUserInfo)
                 handleLogout(); 
+            else
+                onClose();
         } catch (err) {
             setError(err.message || 'Failed to delete account.');
         } finally {
