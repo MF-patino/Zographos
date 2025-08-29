@@ -117,3 +117,30 @@ export const changePermissions = async (username, permissionData, token) => {
         throw new Error(errorText || 'Could not change user permissions.');
     }
 };
+
+
+/**
+ * Fetches a paginated list of all users in the system.
+ * @param {string} token - The JWT authentication token.
+ * @param {number} index - The starting index for the user list (e.g., 0, 64, 128).
+ * @returns {Promise<Array>} - A promise that resolves to a list of UserInfo DTOs.
+ */
+export const getAllUsers = async (token, index = 0) => {
+    const url = new URL(`${API_URL}/user`);
+    url.searchParams.append('index', index);
+
+    const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to fetch users.');
+    }
+
+    return response.json();
+};

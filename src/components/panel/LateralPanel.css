@@ -1,0 +1,90 @@
+.lateral-panel {
+    position: fixed;
+    top: var(--logged-header-height);
+    right: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%); /* Start off-screen */
+    transition: transform 0.3s ease-in-out;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+}
+
+.lateral-panel.open {
+    transform: translateX(0); /* Slide in */
+}
+
+.panel-handle-btn {
+    position: absolute;
+    /* Position it vertically in the middle */
+    top: 10%;
+    transform: translateY(-50%);
+
+    /* Position it just to the LEFT of the panel's edge */
+    right: 100%; /* This is the key: it pushes the button outside the parent */
+
+    width: 20px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px 0 0 8px; /* Rounded on the left side */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: -3px 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.handle-icon {
+    /* The icon will rotate when the panel opens */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* When the panel is open, rotate the arrow icon to point the other way */
+.lateral-panel.open .handle-icon {
+    transform: rotate(180deg);
+}
+
+.panel-close-btn {
+    background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer;
+}
+
+.panel-tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: #888;
+}
+
+.tab-btn.active {
+    background-color: white;
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+}
+
+.panel-content {
+    flex-grow: 1;
+    overflow-y: auto; /* Allow content to scroll */
+}
+
+.panel-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1499; /* Just behind the panel */
+}
