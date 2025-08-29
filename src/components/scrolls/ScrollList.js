@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuthContext } from '../auth/AuthContext';
-import { FaPlus } from 'react-icons/fa'; // Import the plus icon
+import { FaPlus, FaPencilAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './ScrollList.css';
 
@@ -18,11 +18,11 @@ const AddScrollCard = ({handleAddClick}) => {
 
 
 // This is the main list component
-const ScrollList = ({ scrolls, onAddClick }) => {
+const ScrollList = ({ scrolls, onAddClick, onEditScroll }) => {
     const { userInfo } = useAuthContext();
     
     // Check if the user has admin or root permissions
-    const canAddScrolls = userInfo.permissions === 'admin' || userInfo.permissions === 'root';
+    const canManageScrolls = userInfo.permissions === 'admin' || userInfo.permissions === 'root';
 
     // This function will be called if an image fails to load.
     // It replaces the src of the failed image with the placeholder.
@@ -30,15 +30,34 @@ const ScrollList = ({ scrolls, onAddClick }) => {
         event.target.src = '/images/default-scroll-thumbnail.png';
     };
 
+    const handleEditClick = (event, scroll) => {
+        // Stop the click from propagating to the parent <Link>
+        event.preventDefault();
+        event.stopPropagation();
+        
+        onEditScroll(scroll)
+    };
+
     return (
         <div className="scroll-list">
             {/* Conditionally render the "Add" card */}
-            {canAddScrolls && <AddScrollCard handleAddClick={onAddClick} />}
+            {canManageScrolls && <AddScrollCard handleAddClick={onAddClick} />}
             
             {/* Map over the scrolls and render a card for each */}
             {scrolls.map(scroll => (
                 <Link to={`/scrolls/${scroll.scrollId}`} key={scroll.scrollId} className="scroll-card-link">
                     <div key={scroll.scrollId} className="scroll-card">
+                        {/*3. Conditionally render the edit button*/}
+                        {canManageScrolls && (
+                            <button 
+                                className="edit-scroll-btn" 
+                                onClick={(e) => handleEditClick(e, scroll)}
+                                aria-label={`Edit ${scroll.displayName}`}
+                            >
+                                <FaPencilAlt />
+                            </button>
+                        )}
+
                         <img 
                             src={scroll.thumbnailUrl || '/images/default-scroll-thumbnail.png'}  
                             onError={addDefaultSrc} alt={scroll.scrollId} className="scroll-thumbnail" 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../auth/AuthContext';
 import * as scrollService from '../../api/scrollService';
 import ScrollList from './ScrollList';
-import AddScrollForm from './AddScrollForm';
+import ManageScrollForm from './ManageScrollForm';
 import './ScrollPage.css';
 
 const ScrollsPage = () => {
@@ -12,12 +12,31 @@ const ScrollsPage = () => {
     const [scrolls, setScrolls] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedScroll, setSelectedScroll] = useState(null);
     
     const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
+    const handleScrollUpdated = (updatedScroll) => {
+        const selectedScrollIndex = scrolls.findIndex(s => s.scrollId === selectedScroll.scrollId);
+
+        if (selectedScrollIndex !== -1) {
+            // Create a new array to avoid direct state mutation.
+            const updatedScrolls = [...scrolls];
+            // Replace the old scroll object with the updated one from the API.
+            updatedScrolls[selectedScrollIndex] = updatedScroll;
+            setScrolls(updatedScrolls);
+            setSelectedScroll(null);
+        }
+    };
+    
     const handleScrollAdded = (newScroll) => {
         // Add the new scroll to the top of the list for immediate feedback
         setScrolls(prevScrolls => [newScroll, ...prevScrolls]);
+    };
+
+    const handleScrollDeleted = (deletedScrollId) => {
+        setScrolls(prevScrolls => prevScrolls.filter(scroll => scroll.scrollId !== deletedScrollId));
+        setSelectedScroll(null);
     };
 
     // Fetch scrolls when the component mounts
@@ -44,8 +63,17 @@ const ScrollsPage = () => {
 
     let content = <p>No scrolls have been uploaded yet.</p>;
 
+    const handleEditClick = (scroll) => {
+        setSelectedScroll(scroll);
+        setIsAddFormOpen(true);
+    };
+    const handleAddClick = () => {
+        setSelectedScroll(null);
+        setIsAddFormOpen(true);
+    };
+
     if (scrolls.length > 0 || canAddScrolls) {
-        content = <ScrollList scrolls={scrolls} onAddClick={() => setIsAddFormOpen(true)} />;
+        content = <ScrollList scrolls={scrolls} onAddClick={handleAddClick} onEditScroll={handleEditClick} />;
     }
 
     if (error) {
@@ -68,10 +96,13 @@ const ScrollsPage = () => {
             </div>
 
             {/* Render the form */}
-            <AddScrollForm
+            <ManageScrollForm
                 isOpen={isAddFormOpen}
                 onClose={() => setIsAddFormOpen(false)}
                 onScrollAdded={handleScrollAdded}
+                onScrollUpdated={handleScrollUpdated}
+                onScrollDeleted={handleScrollDeleted}
+                scrollInfo={selectedScroll}
             />
         </>
     );

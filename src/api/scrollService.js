@@ -103,3 +103,31 @@ export const getScrollImageBlob = async (token, scrollId) => {
 
     return response.blob();
 };
+
+
+/**
+ * Updates the metadata for an existing scroll.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} originalScrollId - The ID of the scroll to update (from the URL path).
+ *- @param {object} metadata - The DTO containing the new scroll metadata.
+ * @returns {Promise<object>} - The updated scroll object from the server.
+ */
+export const updateScroll = async (token, originalScrollId, metadata) => {
+    // The endpoint is /scrolls/{scrollId}
+    const response = await fetch(`${API_URL}/scrolls/${originalScrollId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        // The body is the NewScroll DTO, serialized to a JSON string.
+        body: JSON.stringify(metadata),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update scroll. Status: ${response.status}`);
+    }
+
+    // A successful PUT should return the updated resource.
+    return response.json();
+};

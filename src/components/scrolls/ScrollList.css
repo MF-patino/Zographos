@@ -17,11 +17,12 @@
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
 
+    position: relative; 
+}
 .scroll-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px B(0, 0, 0, 0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .scroll-thumbnail {
@@ -75,4 +76,37 @@
 
 .add-card:hover .add-card-content {
     color: #007bff;
+}
+
+.edit-scroll-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10; /* Ensure it's on top of the thumbnail */
+    
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Make it a circle */
+    width: 40px;
+    height: 40px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    cursor: pointer;
+    opacity: 0; /* Hidden by default */
+    transform: scale(0.8);
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Show the button when the user hovers over the card */
+.scroll-card:hover .edit-scroll-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.edit-scroll-btn:hover {
+    background-color: #007bff; /* Highlight on hover */
 }
