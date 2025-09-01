@@ -110,8 +110,8 @@ const AuthForm = () => {
                         required
                         value={formData[entry.name]}
                         onChange={handleInputChange}
-                        minlength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
-                        maxlength={MAX_ENTRY_LENGTH}
+                        minLength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
+                        maxLength={MAX_ENTRY_LENGTH}
                     />
                 </div>
     }

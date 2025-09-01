@@ -1,0 +1,38 @@
+.user-list-tab {
+    padding: 20px;
+}
+
+.user-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.user-list-name {
+    font-weight: bold;
+}
+
+.user-list-username {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.load-more-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

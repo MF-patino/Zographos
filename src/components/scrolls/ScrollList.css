@@ -1,0 +1,112 @@
+.scroll-list {
+    display: grid;
+    /* This creates a responsive grid */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.scroll-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.scroll-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+    position: relative; 
+}
+.scroll-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.scroll-thumbnail {
+    width: 75%;
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+}
+
+.scroll-info {
+    padding: 15px;
+}
+
+.scroll-info h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.scroll-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* --- Styles for the "Add New Scroll" card --- */
+.add-card {
+    /* The discontinuous (dashed) line outline */
+    border: 3px dashed #cccccc;
+    box-shadow: none;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px; /* Give it a similar height to other cards */
+}
+
+.add-card:hover {
+    border-color: #007bff;
+    background-color: #e9ecef;
+}
+
+.add-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #888;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: color 0.2s ease-in-out;
+}
+
+.add-card:hover .add-card-content {
+    color: #007bff;
+}
+
+.edit-scroll-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10; /* Ensure it's on top of the thumbnail */
+    
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Make it a circle */
+    width: 40px;
+    height: 40px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    cursor: pointer;
+    opacity: 0; /* Hidden by default */
+    transform: scale(0.8);
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Show the button when the user hovers over the card */
+.scroll-card:hover .edit-scroll-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.edit-scroll-btn:hover {
+    background-color: #007bff; /* Highlight on hover */
+}

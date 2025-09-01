@@ -1,3 +1,8 @@
+/* --- Root variable for the header height for easy reuse --- */
+:root {
+    --logged-header-height: 60px;
+}
+
 /* --- Default state configuration, for when user is not logged in --- */
 
 .App-header {
@@ -71,7 +76,7 @@
 
 .App-header.logged-in {
     /* Thinner height */
-    height: 60px; 
+    height: var(--logged-header-height); 
 }
 
 .App-header.logged-in .logo-container {

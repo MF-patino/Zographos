@@ -1,0 +1,36 @@
+.modal-close-btn {
+    position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer;
+}
+.modal-btn.confirm { background-color: #007bff; color: white; }
+.error-text { color: #dc3545; }
+
+/* --- New form-specific styles --- */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input[type="file"] {
+    padding: 3px;
+}

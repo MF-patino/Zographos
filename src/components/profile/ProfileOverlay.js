@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useAuthContext } from '../auth/AuthContext';
 import * as userService from '../../api/userService';
 import ConfirmationModal from '../common/ConfirmationModal';
 import { MIN_PASSWORD_LENGTH, MIN_ENTRY_LENGTH, MAX_ENTRY_LENGTH } from '../../config/formValidation';
 import './ProfileOverlay.css';
 
-// This component takes isOpen, onClose, and userInfo as props
-const ProfileOverlay = ({ isOpen, onClose }) => {
+// This component takes isOpen, onClose, and otherUserInfo as props
+const ProfileOverlay = ({ isOpen, onClose, otherUserInfo=null }) => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -15,7 +16,19 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [isPasswordMode, setIsPasswordMode] = useState(false);
 
-    const { userInfo, token, deleteLoginInfo, storeLoginInfo } = useAuthContext();
+    const [isPermissionsMode, setIsPermissionsMode] = useState(false);
+    const [selectedPermission, setSelectedPermission] = useState('');
+
+    const { userInfo: loggedUser, token, deleteLoginInfo, storeLoginInfo } = useAuthContext();
+
+    const isAdmin = loggedUser && (loggedUser.permissions === 'admin' || loggedUser.permissions === 'root');
+    const canEdit = !otherUserInfo || (isAdmin && otherUserInfo && otherUserInfo.permissions !== 'root')
+    const canChangePermissions = isAdmin && otherUserInfo && otherUserInfo.permissions !== 'root';
+    const canSubmit = isEditMode || isPasswordMode || isPermissionsMode
+
+    let userInfo = loggedUser
+    if (otherUserInfo)
+        userInfo = otherUserInfo
 
     const formEntries = [
         {name: "username", type: 'text', title: 'Username:'},
@@ -43,6 +56,7 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
     useEffect(() => {
         // Prefill the fields if userInfo is not null
         if (userInfo) {
+            setSelectedPermission(userInfo.permissions);
             setFormData(() => (userInfo.basic_info));
         }
     }, [userInfo]); // Runs when userInfo changes
@@ -64,8 +78,11 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
         try {
             await userService.deleteProfile(userInfo.basic_info.username, token);
             alert('Account deleted successfully.');
-            // After successful deletion, log the user out.
-            handleLogout(); 
+            // After successful deletion, log the user out if it is the user being deleted.
+            if (!otherUserInfo)
+                handleLogout(); 
+            else
+                onClose();
         } catch (err) {
             setError(err.message || 'Failed to delete account.');
         } finally {
@@ -87,52 +104,58 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
         }));
     };
 
-    const switchEditModeHandler = () => {
-        setIsEditMode(prevMode => !prevMode);
-        setIsPasswordMode(false);
-        setError(null); // Clear errors when switching modes
-
-         // Restart field values
-        setFormData(() => (userInfo.basic_info));
-        setPasswordFormData(() => (getEntryStateObject(passwordFormEntries)));
+    const handlePermissionChange = (event) => {
+        setSelectedPermission(event.target.value);
     };
 
-    const switchPasswordModeHandler = () => {
-        setIsPasswordMode(prevMode => !prevMode);
-        setIsEditMode(false);
+    // Generic mode switcher
+    const switchMode = (mode) => {
+        setIsEditMode(mode === 'edit');
+        setIsPasswordMode(mode === 'password');
+        setIsPermissionsMode(mode === 'permissions');
         setError(null); // Clear errors when switching modes
 
-         // Restart field values
-        setFormData(() => (userInfo.basic_info));
-        setPasswordFormData(() => (getEntryStateObject(passwordFormEntries)));
+        // Reset form data to the original state when switching modes
+        setFormData(userInfo.basic_info);
+        setPasswordFormData(getEntryStateObject(passwordFormEntries));
     };
 
     const submitHandler = async (event) => {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
+
         try {
             if (isPasswordMode && (passwordFormData.password !== passwordFormData.repeat))
                 throw new Error("The new and repeated password fields do not coincide.")
 
-            const data = isEditMode ? {basic_info: formData,} : {password: passwordFormData.password,};
-            await userService.editInfo(userInfo.basic_info.username, data, token);
+            if (isPermissionsMode){
+                await userService.changePermissions(userInfo.basic_info.username, {permissions: selectedPermission,}, token);
+                userInfo.permissions = selectedPermission
+            } else {
+                const data = isEditMode ? {basic_info: formData,} : {password: passwordFormData.password,};
+                await userService.editInfo(userInfo.basic_info.username, data, token);
+                userInfo.basic_info = formData
+            }
 
             if (isEditMode){
                 // username change requires a logout due to the JWT authentication
                 // as the JWT of a user contains their username
-                if (userInfo.basic_info.username !== formData.username){
-                    alert("Username changes require logging out.")
-                    handleLogout();
-                } else {
-                    const newUserInfo = userInfo
-                    newUserInfo.basic_info = formData
 
-                    storeLoginInfo(token, newUserInfo)
-                    switchEditModeHandler()
+                if (!otherUserInfo){
+                    if (userInfo.basic_info.username !== formData.username){
+                        alert("Username changes require logging out.")
+                        handleLogout();
+                    } else {
+                        const newUserInfo = userInfo
+                        newUserInfo.basic_info = formData
+
+                        storeLoginInfo(token, newUserInfo)
+                    }
                 }
-            } else if (isPasswordMode)
-                switchPasswordModeHandler()
+            }
+            
+            switchMode(null)
             
         } catch (err) {
             var finalError = ''
@@ -156,33 +179,45 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                         required
                         value={data[entry.name]}
                         onChange={handleInputChange}
-                        minlength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
-                        maxlength={MAX_ENTRY_LENGTH}
+                        minLength={entry.type==="password" ? MIN_PASSWORD_LENGTH : MIN_ENTRY_LENGTH}
+                        maxLength={MAX_ENTRY_LENGTH}
                         // check just in case to not show the passwords plainly
                     /> : (!isPasswordMode && <span>{data[entry.name]}</span>)}
                 </span>
     }
 
-    return (
+    const deleteMessage = otherUserInfo ? `Are you sure you want to delete the account ${userInfo.basic_info.username}? This action cannot be undone.`
+                                        : `Are you sure you want to delete your account, ${userInfo.basic_info.username}? This action cannot be undone.`
+
+    const profileContent = (
         // The backdrop that covers the page
         <div className="overlay-backdrop" onClick={onClose}>
             {/* The main content of the overlay */}
             <div className="overlay-content" onClick={handleContentClick}>
                 <button className="overlay-close-btn" onClick={onClose}>&times;</button>
                 
-                <h3>Profile information</h3>
+                <h3>Profile {otherUserInfo ? `of ${userInfo.basic_info.username}` : 'information'}</h3>
                 
                 <form onSubmit={submitHandler}>
-                    {isPasswordMode ?
+                    {isPermissionsMode ?
+                    <div className="user-info-grid">
+                        <b>Permissions:</b>
+                        <select value={selectedPermission} onChange={handlePermissionChange} className="permission-select">
+                            <option value="read">Read</option>
+                            <option value="write">Write</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>: 
+                    isPasswordMode ?
                     passwordFormEntries.map((entry) => createEntry(entry, passwordFormData)):
                     formEntries.map((entry) => createEntry(entry, formData))}
 
-                    {!(isEditMode || isPasswordMode) && 
+                    {!canSubmit && 
                     <span className="user-info-grid">
                         <b>Permissions: </b> <span className="permission-tag">{userInfo.permissions}</span> 
                     </span>}
 
-                    {(isEditMode || isPasswordMode) &&
+                    {canSubmit &&
                     <span>
                         <span className="error-text">{error}</span>
                         {/* Button for sending the request*/}
@@ -202,9 +237,10 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
                             {isDeleting ? 'Deleting...' : 'Delete account'}
                         </button>
                     )}
-                    <button className="action-btn" onClick={switchEditModeHandler}>Edit info</button>
-                    <button className="action-btn" onClick={switchPasswordModeHandler}>Change password</button>
-                    <button className="action-btn logout" onClick={handleLogout}>Logout</button>
+                    {canEdit && <button className="action-btn" onClick={() => switchMode(isEditMode ? null : 'edit')}>{isEditMode ? 'Cancel' : 'Edit info'}</button>}
+                    {canEdit && <button className="action-btn" onClick={() => switchMode(isPasswordMode ? null : 'password')}>{isPasswordMode ? 'Cancel' : 'Change password'}</button>}
+                    {canChangePermissions && <button className="action-btn" onClick={() => switchMode(isPermissionsMode ? null : 'permissions')}>{isPermissionsMode ? 'Cancel' : 'Change permissions'}</button>}
+                    {!otherUserInfo && <button className="action-btn logout" onClick={handleLogout}>Logout</button>}
                 </div>
             </div>
 
@@ -212,11 +248,16 @@ const ProfileOverlay = ({ isOpen, onClose }) => {
             <ConfirmationModal
                 isOpen={isConfirmModalOpen}
                 title="Delete account"
-                message={`Are you absolutely sure you want to delete your account, ${userInfo.basic_info.username}? This action cannot be undone.`}
+                message={deleteMessage}
                 onConfirm={handleDeleteConfirm}
                 onCancel={() => setIsConfirmModalOpen(false)}
             />
         </div>
+    );
+
+    return ReactDOM.createPortal(
+        profileContent,
+        document.getElementById('overlay-root')
     );
 };
 
