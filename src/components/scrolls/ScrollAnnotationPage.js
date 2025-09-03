@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as scrollService from '../../api/scrollService';
+import * as annotationService from '../../api/annotationService';
 import { useAuthContext } from '../auth/AuthContext';
+import AnnotationBox from '../annotations/AnnotationBox'; // The new component
 import { FaPlus, FaMinus, FaExpand } from 'react-icons/fa';
 import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pan-pinch';
 import './ScrollAnnotationPage.css';
@@ -21,6 +23,8 @@ const ScrollAnnotationPage = () => {
     const { token } = useAuthContext();
     const { scrollId } = useParams();
     const navigate = useNavigate();
+
+    const [annotations, setAnnotations] = useState([]);
 
     const [imageUrl, setImageUrl] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -43,11 +47,16 @@ const ScrollAnnotationPage = () => {
     useEffect(() => {
         let objectUrl = null; // Variable to hold the URL for cleanup
 
-        const fetchAndSetImage = async () => {
+        const fetchScrollData = async () => {
             try {
                 // Fetch the image data as a blob
-                const imageBlob = await scrollService.getScrollImageBlob(token, scrollId);
+                const [imageBlob, annotationResponse] = await Promise.all([
+                    scrollService.getScrollImageBlob(token, scrollId),
+                    annotationService.getScrollRegions(token, scrollId)
+                ]);
                 
+                setAnnotations(annotationResponse.regions);
+
                 // Create a temporary URL for the blob
                 objectUrl = URL.createObjectURL(imageBlob);
                 setImageUrl(objectUrl);
@@ -59,7 +68,7 @@ const ScrollAnnotationPage = () => {
             }
         };
 
-        fetchAndSetImage();
+        fetchScrollData();
 
         // Cleanup to prevent memory leaks.
         return () => {
@@ -94,7 +103,11 @@ const ScrollAnnotationPage = () => {
                         <Controls />
                         <TransformComponent wrapperClass="canvas-wrapper" contentClass="canvas-content">
                             <img src={imageUrl} alt={`Ink prediction for ${scrollId}`} />
-                            {/* TODO: Annotation boxes will go here */}
+                            
+                            {/* Map over the annotations and render a box for each one */}
+                            {annotations.map(annotation => (
+                                <AnnotationBox key={annotation.regionId} annotation={annotation} />
+                            ))}
                         </TransformComponent>
                     </>
                 )}

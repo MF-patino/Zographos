@@ -1,0 +1,11 @@
+.annotation-box {
+    position: absolute;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.annotation-box:hover {
+    background-color: rgba(255, 215, 0, 0.2);
+}
