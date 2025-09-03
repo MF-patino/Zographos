@@ -2,24 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as scrollService from '../../api/scrollService';
 import { useAuthContext } from '../auth/AuthContext';
-import ConfirmationModal from '../common/ConfirmationModal';
+import { FaPlus, FaMinus, FaExpand } from 'react-icons/fa';
+import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pan-pinch';
 import './ScrollAnnotationPage.css';
 
+const Controls = () => {
+    const { zoomIn, zoomOut, resetTransform } = useControls();
+    return (
+        <div className="zoom-controls">
+            <button onClick={() => zoomIn()} title="Zoom in"><FaPlus /></button>
+            <button onClick={() => zoomOut()} title="Zoom out"><FaMinus /></button>
+            <button onClick={() => resetTransform()} title="Reset view"><FaExpand /></button>
+        </div>
+    );
+};
+
 const ScrollAnnotationPage = () => {
-    const { userInfo, token } = useAuthContext();
+    const { token } = useAuthContext();
     const { scrollId } = useParams();
     const navigate = useNavigate();
 
     const [imageUrl, setImageUrl] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [mouseDown, setMouseDown] = useState(false);
 
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const handleMouseDown = () => {setMouseDown(true);}
+    const handleMouseUp = () => {setMouseDown(false);}
 
-    // Check if the current user has permission to delete this scroll
-    const canDelete = userInfo.permissions === 'admin' || userInfo.permissions === 'root';
-
+    useEffect(() => {
+        window.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            window.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
+    
     // Image data fetching effect
     useEffect(() => {
         let objectUrl = null; // Variable to hold the URL for cleanup
@@ -55,64 +74,46 @@ const ScrollAnnotationPage = () => {
         navigate('/scrolls');
     };
 
-    const handleDelete = () => {
-        setIsConfirmModalOpen(true);
-    };
-
-    const handleDeleteConfirm = async () => {
-        setIsConfirmModalOpen(false);
-        setIsDeleting(true);
-        setError(null);
-        try {
-            await scrollService.deleteScroll(token, scrollId)
-            alert('Scroll deleted successfully.');
-            handleBack();
-        } catch (err) {
-            var finalError = ''
-            try {finalError = JSON.parse(err.message)} catch { finalError = err }
-            
-            setError(finalError.message || 'Failed to delete scroll.');
-        } finally {
-            setIsDeleting(false);
-        }
-    };
-
-    let imageContent;
+    let content;
     if (isLoading) {
-        imageContent = <p>Loading image...</p>;
+        content = <p className="loading-text">Loading scroll image...</p>;
     } else if (error) {
-        imageContent = <p className="error-text">{error}</p>;
+        content = <p className="error-text">{error}</p>;
     } else if (imageUrl) {
-        imageContent = <img src={imageUrl} alt={`Ink prediction for ${scrollId}`} />;
+        content = (
+            // The main wrapper that manages all the state.
+            <TransformWrapper
+                initialScale={1}
+                minScale={0.2}
+                maxScale={10}
+                limitToBounds={false} // Allows panning beyond the image edges
+                panning={{ velocityDisabled: true }} // Disables the "throw" effect for more precise movement
+            >
+                {() => (
+                    <>
+                        <Controls />
+                        <TransformComponent wrapperClass="canvas-wrapper" contentClass="canvas-content">
+                            <img src={imageUrl} alt={`Ink prediction for ${scrollId}`} />
+                            {/* TODO: Annotation boxes will go here */}
+                        </TransformComponent>
+                    </>
+                )}
+            </TransformWrapper>
+        );
     }
 
     return (
-        <div className="scroll-detail-page">
+        <div className="scroll-annotation-page">
             <div className="detail-header">
-                <button onClick={handleBack} className="back-button">&larr; Back to List</button>
+                <button onClick={handleBack} className="back-button">&larr; Back</button>
                 <h2>Annotating {scrollId}</h2>
-                {canDelete && (
-                    <button
-                        onClick={handleDelete}
-                        className="delete-button"
-                        disabled={isDeleting}
-                    >
-                        {isDeleting ? 'Deleting...' : 'Delete scroll'}
-                    </button>
-                )}
             </div>
 
-            <div className="image-container">
-                {imageContent}
+            <div className="image-container"
+                style={{ cursor: mouseDown ? "grabbing" : "grab" }}
+            >
+                {content}
             </div>
-
-            <ConfirmationModal
-                isOpen={isConfirmModalOpen}
-                title="Delete scroll"
-                message={`Are you sure you want to delete scroll "${scrollId}"? All associated annotations will also be permanently removed.`}
-                onConfirm={handleDeleteConfirm}
-                onCancel={() => setIsConfirmModalOpen(false)}
-            />
         </div>
     );
 };

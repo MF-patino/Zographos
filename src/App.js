@@ -12,7 +12,7 @@ function App() {
         <div className="App">
           <Header />
 
-          <main>
+          <main className="App-main">
             {/*This is the dedicated mount point for profile overlays*/}
             <div id="overlay-root"></div>
             
