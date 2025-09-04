@@ -3,6 +3,7 @@ import * as userService from '../../api/userService';
 import { usePanel } from '../panel/PanelContext';
 import { useAuthContext } from '../auth/AuthContext';
 import ProfileOverlay from '../profile/ProfileOverlay';
+import StarRating from '../annotations/StarRating';
 import './AnnotationTab.css';
 
 const AnnotationTab = () => {
@@ -80,7 +81,9 @@ const AnnotationTab = () => {
                 {error && <p className="error-text">{error}</p>}
             </div>
             <div className="detail-group">
-                <strong>Certainty:</strong> {selectedAnnotation.certaintyScore.toFixed(2)}/5
+                <strong>Certainty:</strong>
+                
+                <StarRating rating={selectedAnnotation.certaintyScore} /> 
             </div>
             
             <form onSubmit={handleSubmit}>
