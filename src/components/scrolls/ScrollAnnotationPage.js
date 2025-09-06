@@ -1,35 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as scrollService from '../../api/scrollService';
 import * as annotationService from '../../api/annotationService';
 import { useAuthContext } from '../auth/AuthContext';
-import AnnotationBox from '../annotations/AnnotationBox'; // The new component
-import { FaPlus, FaMinus, FaExpand } from 'react-icons/fa';
+import { useAnnotationContext } from '../annotations/AnnotationContext';
+import AnnotationBox from '../annotations/AnnotationBox';
+import { FaPlus, FaMinus, FaExpand, FaPen } from 'react-icons/fa';
 import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pan-pinch';
+import { usePanel } from '../panel/PanelContext';
 import './ScrollAnnotationPage.css';
 
-const Controls = () => {
+const Controls = ({ isDrawingMode, onToggleDrawingMode }) => {
     const { zoomIn, zoomOut, resetTransform } = useControls();
+
     return (
         <div className="zoom-controls">
-            <button onClick={() => zoomIn()} title="Zoom in"><FaPlus /></button>
-            <button onClick={() => zoomOut()} title="Zoom out"><FaMinus /></button>
-            <button onClick={() => resetTransform()} title="Reset view"><FaExpand /></button>
+            {/* Button to toggle drawing mode */}
+            <button
+                onClick={onToggleDrawingMode}
+                className={isDrawingMode ? 'active' : ''}
+                title={isDrawingMode ? 'Disable Drawing Mode' : 'Enable Drawing Mode'}
+            >
+                <FaPen />
+            </button>
+
+            {/* Buttons for canvas transformations */}
+            <button onClick={() => zoomIn()} title="Zoom In"><FaPlus /></button>
+            <button onClick={() => zoomOut()} title="Zoom Out"><FaMinus /></button>
+            <button onClick={() => resetTransform()} title="Reset View"><FaExpand /></button>
         </div>
     );
 };
 
 const ScrollAnnotationPage = () => {
-    const { token } = useAuthContext();
+    const { annotations, setAnnotations } = useAnnotationContext();
+
+    const { openPanel } = usePanel();
+    const { token, userInfo } = useAuthContext();
     const { scrollId } = useParams();
     const navigate = useNavigate();
-
-    const [annotations, setAnnotations] = useState([]);
 
     const [imageUrl, setImageUrl] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [mouseDown, setMouseDown] = useState(false);
+
+    // State for drawing mode
+    const [transformState, setTransformState] = useState({ scale: 1, positionX: 0, positionY: 0 });
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
+    const [isDrawing, setIsDrawing] = useState(false); // Tracks if mouse is currently down
+    const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
+    const [newBox, setNewBox] = useState(null);
+    const canvasRef = useRef(null); // Ref to the image wrapper for coordinates
 
     const handleMouseDown = () => {setMouseDown(true);}
     const handleMouseUp = () => {setMouseDown(false);}
@@ -77,7 +99,71 @@ const ScrollAnnotationPage = () => {
             }
         };
 
-    }, [scrollId, token]);
+    }, [scrollId, token, setAnnotations]);
+
+    // Mouse Handlers for Drawing
+    const handleDrawMouseDown = (e) => {
+        if (!isDrawingMode || !canvasRef.current) return;
+    
+        e.stopPropagation(); // Stop pan-pinch from activating
+        
+        const { scale, positionX, positionY } = transformState;
+        const rect = canvasRef.current.getBoundingClientRect();
+
+        // Calculate mouse position relative to the scaled and panned image
+        const x = (e.clientX - rect.left - positionX) / scale;
+        const y = (e.clientY - rect.top - positionY) / scale;
+
+        setIsDrawing(true);
+        setStartPoint({ x, y });
+        setNewBox({ x, y, width: 0, height: 0 });
+    };
+
+    const handleDrawMouseMove = (e) => {
+        if (!isDrawing || !canvasRef.current) return;
+
+        const { scale, positionX, positionY } = transformState;
+        const rect = canvasRef.current.getBoundingClientRect();
+        
+        const currentX = (e.clientX - rect.left - positionX) / scale;
+        const currentY = (e.clientY - rect.top - positionY) / scale;
+
+        setNewBox({
+            x: Math.min(startPoint.x, currentX),
+            y: Math.min(startPoint.y, currentY),
+            width: Math.abs(currentX - startPoint.x),
+            height: Math.abs(currentY - startPoint.y),
+        });
+    };
+
+    const boxToAnnotation = (box) => {
+        return {
+            isNew: true,
+            authorUsername: userInfo.basic_info.username,
+            certaintyScore: 0,
+            basic_info: {
+                coordinates: box,
+                transcription: '',
+            },
+        };
+    }
+    const handleDrawMouseUp = () => {
+        console.log("hola")
+        if (!isDrawing) return;
+        setIsDrawing(false);
+        
+        if (newBox && newBox.width > .001 && newBox.height > .001) {
+            
+            openPanel('annotation', boxToAnnotation(newBox));
+        } else
+            setNewBox(null)
+    };
+  
+    // Handler for the button in the controls
+    const toggleDrawingMode = () => {
+        setIsDrawingMode(prev => !prev);
+        setNewBox(null);
+    };
 
     const handleBack = () => {
         navigate('/scrolls');
@@ -96,18 +182,30 @@ const ScrollAnnotationPage = () => {
                 minScale={0.2}
                 maxScale={10}
                 limitToBounds={false} // Allows panning beyond the image edges
-                panning={{ velocityDisabled: true }} // Disables the "throw" effect for more precise movement
+                panning={{ disabled: isDrawingMode, velocityDisabled: true }}
+                doubleClick={{ disabled: true }} // Disable double click to avoid conflicts
+                onTransformed={(ref, state) => setTransformState(state)}
             >
                 {() => (
                     <>
-                        <Controls />
+                        <Controls isDrawingMode={isDrawingMode} onToggleDrawingMode={toggleDrawingMode} />
                         <TransformComponent wrapperClass="canvas-wrapper" contentClass="canvas-content">
-                            <img src={imageUrl} alt={`Ink prediction for ${scrollId}`} />
+                            <div
+                                // Add mouse handlers
+                                onMouseDown={handleDrawMouseDown}
+                                onMouseMove={handleDrawMouseMove}
+                                onMouseUp={handleDrawMouseUp}>
+
+                                <img src={imageUrl} alt={`Ink prediction for ${scrollId}`} />
+                                
+                                {/* Map over the annotations and render a box for each one */}
+                                {annotations.map(annotation => (
+                                    <AnnotationBox key={annotation.regionId} annotation={annotation} isDisabled={isDrawingMode} />
+                                ))}
+
                             
-                            {/* Map over the annotations and render a box for each one */}
-                            {annotations.map(annotation => (
-                                <AnnotationBox key={annotation.regionId} annotation={annotation} />
-                            ))}
+                                {newBox && <AnnotationBox annotation={boxToAnnotation(newBox)} isDrawing={true} />}
+                            </div>
                         </TransformComponent>
                     </>
                 )}
@@ -122,8 +220,8 @@ const ScrollAnnotationPage = () => {
                 <h2>Annotating {scrollId}</h2>
             </div>
 
-            <div className="image-container"
-                style={{ cursor: mouseDown ? "grabbing" : "grab" }}
+            <div ref={canvasRef} className="canvas-container"
+                style={{ cursor: isDrawingMode ? 'crosshair' : (mouseDown ? "grabbing" : "grab") }}
             >
                 {content}
             </div>

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import * as userService from '../../api/userService';
+import * as annotationService from '../../api/annotationService';
 import { usePanel } from '../panel/PanelContext';
 import { useAuthContext } from '../auth/AuthContext';
+import { useAnnotationContext } from '../annotations/AnnotationContext';
 import ProfileOverlay from '../profile/ProfileOverlay';
 import StarRating from '../annotations/StarRating';
 import './AnnotationTab.css';
 
 const AnnotationTab = () => {
-    const { selectedAnnotation } = usePanel();
+    const { addAnnotation } = useAnnotationContext();
+
+    const { selectedAnnotation, setSelectedAnnotation } = usePanel();
     const { token, userInfo } = useAuthContext(); // To check if user can edit
     const [isEditMode, setIsEditMode] = useState(false);
     const [formData, setFormData] = useState({ transcription: '' });
@@ -16,6 +21,8 @@ const AnnotationTab = () => {
 
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+
+    const { scrollId } = useParams(); // Get the current scrollId
 
     // Handlers to open and close the overlay
     const openOverlay = async () => {
@@ -49,7 +56,8 @@ const AnnotationTab = () => {
             setFormData({
                 transcription: selectedAnnotation.basic_info.transcription,
             });
-            setIsEditMode(false); // Default to view mode
+            // Default to view mode unless user is creating a new annotation
+            setIsEditMode(!!selectedAnnotation.isNew);
         }
         setError(null);
     }, [selectedAnnotation]);
@@ -68,8 +76,17 @@ const AnnotationTab = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!!selectedAnnotation.isNew){
+            const newAnnotationData = {
+                transcription: formData.transcription,
+                coordinates: selectedAnnotation.basic_info.coordinates,
+            };
+            
+            const newAnnotation = await annotationService.createAnnotation(token, scrollId, newAnnotationData)
+            addAnnotation(newAnnotation)
+            setSelectedAnnotation(newAnnotation);
+        }
         // TODO: Call annotationService.updateRegion(...)
-        alert(`Updating transcription: ${formData.transcription}`);
         setIsEditMode(false);
     };
 
@@ -100,7 +117,7 @@ const AnnotationTab = () => {
                     )}
                 </div>
 
-                {isEditMode && <button type="submit">Submit changes</button>}
+                {isEditMode && <button type="submit">Submit</button>}
             </form>
 
             <div className="tab-actions">

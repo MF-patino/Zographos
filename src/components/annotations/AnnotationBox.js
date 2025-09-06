@@ -2,7 +2,7 @@ import React from 'react';
 import { usePanel } from '../panel/PanelContext';
 import "./AnnotationBox.css"
 
-const AnnotationBox = ({ annotation }) => {
+const AnnotationBox = ({ annotation, isDisabled = false, isDrawing = false }) => {
     const { openPanel } = usePanel();
 
     const handleClick = () => {
@@ -13,7 +13,7 @@ const AnnotationBox = ({ annotation }) => {
 
     return (
         <div
-            className="annotation-box"
+            className={"annotation-box" + (isDrawing ? " drawing" : (isDisabled ? " disabled" : ' '))}
             style={{
                 left: `${annotation.basic_info.coordinates.x}px`,
                 top: `${annotation.basic_info.coordinates.y}px`,

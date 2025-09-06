@@ -24,6 +24,7 @@ export const PanelProvider = ({ children }) => {
         togglePanel,
         activeTab,
         selectedAnnotation,
+        setSelectedAnnotation,
     };
 
     return <PanelContext.Provider value={value}>{children}</PanelContext.Provider>;

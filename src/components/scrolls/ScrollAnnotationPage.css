@@ -30,19 +30,14 @@
     font-weight: bold;
 }
 
-.image-container {
+.canvas-container {
     width: 100%;
     height: 100%;
-    background-color: #1a1a1a; /* Dark background for the image */
+    background-color: #1a1a1a; /* Dark background for the canvas */
     text-align: center;
-    padding: 20px;
     box-sizing: border-box;
 }
 
-.image-container img {
-    max-width: 100%;
-    height: auto;
-}
 
 /* Configure content's wrapper div */
 .canvas-wrapper {
@@ -55,8 +50,6 @@
     /* The cursor will change to a grabbing hand when panning */
     width: 100%;
     height: 100%;
-    justify-content: center;
-    align-items: center;
 }
 
 /* --- Styles for the Zoom Controls --- */
@@ -99,4 +92,9 @@
 }
 .error-text {
     color: #ff8a80;
+}
+
+.zoom-controls button.active {
+    background-color: #007bff;
+    color: white;
 }
