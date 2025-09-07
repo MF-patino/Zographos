@@ -27,7 +27,7 @@ const ScrollList = ({ scrolls, onAddClick, onEditScroll }) => {
     // This function will be called if an image fails to load.
     // It replaces the src of the failed image with the placeholder.
     const addDefaultSrc = (event) => {
-        event.target.src = '/images/default-scroll-thumbnail.png';
+        event.target.src = `${process.env.PUBLIC_URL}/images/default-scroll-thumbnail.png`;
     };
 
     const handleEditClick = (event, scroll) => {
