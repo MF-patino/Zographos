@@ -7,12 +7,17 @@ import { useAuthContext } from '../auth/AuthContext';
 import { useAnnotationContext } from '../annotations/AnnotationContext';
 import ProfileOverlay from '../profile/ProfileOverlay';
 import StarRating from '../annotations/StarRating';
+import ConfirmationModal from '../common/ConfirmationModal';
+import ReactDOM from 'react-dom';
 import './AnnotationTab.css';
 
 const AnnotationTab = () => {
-    const { addAnnotation } = useAnnotationContext();
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const { selectedAnnotation, setSelectedAnnotation } = usePanel();
+    const { addAnnotation, deleteAnnotation } = useAnnotationContext();
+
+    const { selectedAnnotation, setSelectedAnnotation, openPanel } = usePanel();
     const { token, userInfo } = useAuthContext(); // To check if user can edit
     const [isEditMode, setIsEditMode] = useState(false);
     const [formData, setFormData] = useState({ transcription: '' });
@@ -49,6 +54,22 @@ const AnnotationTab = () => {
         }
     };
 
+    const handleDeleteConfirm = async () => {
+        setIsDeleting(true);
+        setError(null);
+        try {
+            await annotationService.deleteAnnotation(token, scrollId, selectedAnnotation.regionId);
+        } catch (err) {
+            setError(err.message || 'Failed to delete account.');
+        } finally {
+            setIsDeleting(false);
+            setIsEditMode(false);
+            setIsConfirmModalOpen(false);
+            deleteAnnotation(selectedAnnotation.regionId)
+            openPanel("users", null)
+        }
+    };
+
     const closeOverlay = () => setIsOverlayOpen(false);
 
     useEffect(() => {
@@ -66,7 +87,7 @@ const AnnotationTab = () => {
         return <div className="tab-placeholder">Select an annotation to view its details.</div>;
     }
 
-    const canEdit = userInfo.username === selectedAnnotation.authorUsername || 
+    const canEdit = (userInfo.permissions === 'write' && userInfo.username === selectedAnnotation.authorUsername) || 
                     userInfo.permissions === 'admin' || 
                     userInfo.permissions === 'root';
 
@@ -95,7 +116,6 @@ const AnnotationTab = () => {
             <h3>Annotation details</h3>
             <div className="detail-group">
                 <strong>Author:</strong> <button onClick={() => openOverlay()} disabled={isLoading} className="user-link">@{selectedAnnotation.authorUsername}</button>
-                {error && <p className="error-text">{error}</p>}
             </div>
             <div className="detail-group">
                 <strong>Certainty:</strong>
@@ -119,15 +139,39 @@ const AnnotationTab = () => {
 
                 {isEditMode && <button type="submit">Submit</button>}
             </form>
+            
+            {error && <p className="error-text">{error}</p>}
 
             <div className="tab-actions">
                 {canEdit && <button onClick={() => setIsEditMode(prev => !prev)}>{isEditMode ? 'Cancel' : 'Edit'}</button>}
-                {/* TODO: Delete button */}
+
+                {canEdit && (
+                    <button 
+                        className="action-btn delete" 
+                        onClick={() => setIsConfirmModalOpen(true)}
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                )}
             </div>
 
             {/* TODO: Voting button */}
 
             <ProfileOverlay isOpen={isOverlayOpen} onClose={closeOverlay} otherUserInfo={selectedUser} />
+
+            {/* Render the ConfirmationModal.*/}
+            {ReactDOM.createPortal(
+                <ConfirmationModal
+                    isOpen={isConfirmModalOpen}
+                    title="Delete annotation"
+                    message={"Are you sure you want to delete this annotation? This action cannot be undone."}
+                    onConfirm={handleDeleteConfirm}
+                    onCancel={() => setIsConfirmModalOpen(false)}
+                />,
+                document.getElementById('overlay-root')
+            )}
+            
         </div>
     );
 };

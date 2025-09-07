@@ -10,19 +10,20 @@ import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pa
 import { usePanel } from '../panel/PanelContext';
 import './ScrollAnnotationPage.css';
 
-const Controls = ({ isDrawingMode, onToggleDrawingMode }) => {
+const Controls = ({ isDrawingMode, onToggleDrawingMode, permissions }) => {
     const { zoomIn, zoomOut, resetTransform } = useControls();
 
+    const canEdit = ['write', 'admin', 'root'].includes(permissions)
     return (
         <div className="zoom-controls">
             {/* Button to toggle drawing mode */}
-            <button
+            {canEdit && <button
                 onClick={onToggleDrawingMode}
                 className={isDrawingMode ? 'active' : ''}
                 title={isDrawingMode ? 'Disable Drawing Mode' : 'Enable Drawing Mode'}
             >
                 <FaPen />
-            </button>
+            </button>}
 
             {/* Buttons for canvas transformations */}
             <button onClick={() => zoomIn()} title="Zoom In"><FaPlus /></button>
@@ -188,7 +189,7 @@ const ScrollAnnotationPage = () => {
             >
                 {() => (
                     <>
-                        <Controls isDrawingMode={isDrawingMode} onToggleDrawingMode={toggleDrawingMode} />
+                        <Controls isDrawingMode={isDrawingMode} onToggleDrawingMode={toggleDrawingMode} permissions={userInfo.permissions} />
                         <TransformComponent wrapperClass="canvas-wrapper" contentClass="canvas-content">
                             <div
                                 // Add mouse handlers
