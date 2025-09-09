@@ -192,6 +192,8 @@ const ScrollAnnotationPage = () => {
                         <Controls isDrawingMode={isDrawingMode} onToggleDrawingMode={toggleDrawingMode} permissions={userInfo.permissions} />
                         <TransformComponent wrapperClass="canvas-wrapper" contentClass="canvas-content">
                             <div
+                                // Fix issues with canvas not taking available screen space in production build by forcing it to do so
+                                style={{width: `${window.screen.width}px`, height: `${window.screen.height}px`, display: "flex"}}
                                 // Add mouse handlers
                                 onMouseDown={handleDrawMouseDown}
                                 onMouseMove={handleDrawMouseMove}
