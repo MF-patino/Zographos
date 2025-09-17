@@ -15,7 +15,7 @@ const AnnotationTab = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const { addAnnotation, deleteAnnotation } = useAnnotationContext();
+    const { addAnnotation, deleteAnnotation, updateAnnotation } = useAnnotationContext();
 
     const { selectedAnnotation, setSelectedAnnotation, openPanel } = usePanel();
     const { token, userInfo } = useAuthContext(); // To check if user can edit
@@ -59,14 +59,18 @@ const AnnotationTab = () => {
         setError(null);
         try {
             await annotationService.deleteAnnotation(token, scrollId, selectedAnnotation.regionId);
+            
+            deleteAnnotation(selectedAnnotation.regionId)
+            openPanel("users", null)
         } catch (err) {
-            setError(err.message || 'Failed to delete account.');
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            
+            setError(finalError.message || 'Failed to delete annotation.');
         } finally {
             setIsDeleting(false);
             setIsEditMode(false);
             setIsConfirmModalOpen(false);
-            deleteAnnotation(selectedAnnotation.regionId)
-            openPanel("users", null)
         }
     };
 
@@ -96,18 +100,33 @@ const AnnotationTab = () => {
     };
 
     const handleSubmit = async (e) => {
+        setError(null);
         e.preventDefault();
-        if (!!selectedAnnotation.isNew){
-            const newAnnotationData = {
-                transcription: formData.transcription,
-                coordinates: selectedAnnotation.basic_info.coordinates,
-            };
+
+        const newAnnotationData = {
+            transcription: formData.transcription,
+            coordinates: selectedAnnotation.basic_info.coordinates,
+        };
+
+        try {
+            let result;
+            if (!!selectedAnnotation.isNew){
+                result = await annotationService.createAnnotation(token, scrollId, newAnnotationData)
+                addAnnotation(result)
+            }
+            else{
+                result = await annotationService.updateAnnotation(token, scrollId, selectedAnnotation.regionId, newAnnotationData);
+                updateAnnotation(result)
+            }
             
-            const newAnnotation = await annotationService.createAnnotation(token, scrollId, newAnnotationData)
-            addAnnotation(newAnnotation)
-            setSelectedAnnotation(newAnnotation);
+            setSelectedAnnotation(result);
+        } catch (err) {
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            
+            setError(finalError.message || 'Failed to ' + (!!selectedAnnotation.isNew ? "create" : "update") + 'annotation.');
         }
-        // TODO: Call annotationService.updateRegion(...)
+
         setIsEditMode(false);
     };
 

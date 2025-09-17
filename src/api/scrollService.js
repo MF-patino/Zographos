@@ -42,7 +42,7 @@ export const createScroll = async (token, metadata, inkImage) => {
     // The backend expects a part named "ink_image".
     formData.append('ink_image', inkImage);
 
-    // 4. Make the fetch request.
+    // Make the fetch request.
     // The browser will automatically set the Content-Type header
     // with the correct boundary.
     const response = await fetch(`${API_URL}/scrolls`, {

@@ -73,3 +73,32 @@ export const deleteAnnotation = async (token, scrollId, regionId) => {
     
     return;
 };
+
+/**
+ * Updates an existing annotation region.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll containing the annotation.
+ * @param {string} regionId - The UUID of the annotation region to update.
+ * @param {object} annotationData - The data for the annotation update (NewBoxRegion DTO).
+ *   Should have the shape: { coordinates: {...}, transcription: "..." }
+ * @returns {Promise<object>} - The updated BoxRegion object from the server.
+ */
+export const updateAnnotation = async (token, scrollId, regionId, annotationData) => {
+    // Construct the correct endpoint URL for a specific region
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions/${regionId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        // The body contains the updated transcription and coordinates
+        body: JSON.stringify(annotationData),
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update annotation.');
+    }
+
+    return response.json();
+};
