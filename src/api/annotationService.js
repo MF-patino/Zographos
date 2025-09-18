@@ -102,3 +102,32 @@ export const updateAnnotation = async (token, scrollId, regionId, annotationData
 
     return response.json();
 };
+
+/**
+ * Casts a vote on the certainty of an annotation region.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll containing the annotation.
+ * @param {string} regionId - The UUID of the annotation region to vote on.
+ * @param {object} voteData - The user's vote. Should have the shape: { vote: number }
+ * @returns {Promise<object>} - The updated BoxRegion object from the server, with the new certaintyScore.
+ */
+export const voteOnRegion = async (token, scrollId, regionId, voteData) => {
+    // Construct the correct endpoint URL for voting on a specific region
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions/${regionId}/vote`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        // The body contains the vote value, serialized to JSON
+        body: JSON.stringify(voteData),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to cast vote.');
+    }
+
+    // A successful POST for a vote returns the updated BoxRegion resource
+    return response.json();
+};

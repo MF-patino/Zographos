@@ -91,6 +91,7 @@ const AnnotationTab = () => {
         return <div className="tab-placeholder">Select an annotation to view its details.</div>;
     }
 
+    const canVote = ['write', 'admin', 'root'].includes(userInfo.permissions)
     const canEdit = (userInfo.permissions === 'write' && userInfo.username === selectedAnnotation.authorUsername) || 
                     userInfo.permissions === 'admin' || 
                     userInfo.permissions === 'root';
@@ -130,6 +131,29 @@ const AnnotationTab = () => {
         setIsEditMode(false);
     };
 
+    const handleVoteSubmit = async (voteValue) => {
+        if (!selectedAnnotation) return;
+
+        setError(null);
+        try {
+            const updatedAnnotation = await annotationService.voteOnRegion(
+                token,
+                scrollId,
+                selectedAnnotation.regionId,
+                { vote: voteValue }
+            );
+            
+            updateAnnotation(updatedAnnotation)
+            setSelectedAnnotation(updatedAnnotation);
+            alert(`You voted ${voteValue} stars!`);
+
+        } catch (err) {
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            setError(finalError.message || 'Failed to submit vote.');
+        }
+    };
+
     return (
         <div className="annotation-tab">
             <h3>Annotation details</h3>
@@ -139,7 +163,7 @@ const AnnotationTab = () => {
             <div className="detail-group">
                 <strong>Certainty:</strong>
                 
-                <StarRating rating={selectedAnnotation.certaintyScore} /> 
+                <StarRating rating={selectedAnnotation.certaintyScore} canRate={canVote} onRatingSelect={handleVoteSubmit} /> 
             </div>
             
             <form onSubmit={handleSubmit}>
@@ -174,8 +198,6 @@ const AnnotationTab = () => {
                     </button>
                 )}
             </div>
-
-            {/* TODO: Voting button */}
 
             <ProfileOverlay isOpen={isOverlayOpen} onClose={closeOverlay} otherUserInfo={selectedUser} />
 

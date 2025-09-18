@@ -4,3 +4,17 @@
     gap: 2px; /* A small gap between the stars */
     color: #ffc107; /* A nice gold/yellow color for stars */
 }
+
+/* Add a pointer cursor only when the component is interactive */
+.star-rating.interactive .star-wrapper {
+    cursor: pointer;
+}
+
+/* Add a slight transition for a smoother hover effect */
+.star-wrapper {
+    transition: transform 0.1s ease-in-out;
+}
+
+.star-rating.interactive .star-wrapper:hover {
+    transform: scale(1.2);
+}

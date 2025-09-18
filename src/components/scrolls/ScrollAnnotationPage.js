@@ -149,7 +149,6 @@ const ScrollAnnotationPage = () => {
         };
     }
     const handleDrawMouseUp = () => {
-        console.log("hola")
         if (!isDrawing) return;
         setIsDrawing(false);
         
