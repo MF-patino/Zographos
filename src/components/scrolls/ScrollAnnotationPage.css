@@ -39,6 +39,9 @@
     box-sizing: border-box;
 }
 
+.canvas-content img {
+    position: absolute;
+}
 
 /* --- Styles for the Zoom Controls --- */
 .zoom-controls {
