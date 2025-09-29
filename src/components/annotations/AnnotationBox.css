@@ -28,3 +28,42 @@
     box-shadow: none;
     background-color: rgba(255, 82, 82, 0.2);
 }
+
+.resize-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border: 2px solid #007bff;
+    border-radius: 50%; /* Make them circles */
+    pointer-events: all; /* Allow pointer events for all the handles */
+    
+    /* Center the handle on the corner using transform */
+    transform: translate(-50%, -50%);
+}
+
+
+/* Position each handle */
+.resize-handle.top-left {
+    top: 0;
+    left: 0;
+    cursor: nwse-resize; /* Diagonal resize cursor */
+}
+.resize-handle.top-right {
+    top: 0;
+    right: 0;
+    cursor: nesw-resize;
+    transform: translate(50%, -50%); /* Adjust transform for right/bottom corner */
+}
+.resize-handle.bottom-left {
+    bottom: 0;
+    left: 0;
+    cursor: nesw-resize;
+    transform: translate(-50%, 50%);
+}
+.resize-handle.bottom-right {
+    bottom: 0;
+    right: 0;
+    cursor: nwse-resize;
+    transform: translate(50%, 50%);
+}

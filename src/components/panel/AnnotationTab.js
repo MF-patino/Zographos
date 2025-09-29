@@ -61,6 +61,7 @@ const AnnotationTab = () => {
             await annotationService.deleteAnnotation(token, scrollId, selectedAnnotation.regionId);
             
             deleteAnnotation(selectedAnnotation.regionId)
+            setSelectedAnnotation(null)
             openPanel("users", null)
         } catch (err) {
             var finalError = ''
@@ -81,8 +82,9 @@ const AnnotationTab = () => {
             setFormData({
                 transcription: selectedAnnotation.basic_info.transcription,
             });
-            // Default to view mode unless user is creating a new annotation
-            setIsEditMode(!!selectedAnnotation.isNew);
+            // Default to view mode unless user is creating a new annotation 
+            // or already editing this annotation
+            setIsEditMode(selectedAnnotation.isNew || selectedAnnotation.isEditing);
         }
         setError(null);
     }, [selectedAnnotation]);
@@ -129,6 +131,20 @@ const AnnotationTab = () => {
         }
 
         setIsEditMode(false);
+    };
+
+    const handleSwitchEditMode = () => {
+        const isEnteringEditMode = !isEditMode;
+
+        // A deep copy is made of the previous selectedAnnotation.
+        // This is needed as the ScrollAnnotationPage can perform resize transformations on it.
+        // Without the deep copy, the original annotation object in the annotation context list
+        // will be indirectly modified by ScrollAnnotationPage.
+        const newSelectedAnnotation = JSON.parse(JSON.stringify(selectedAnnotation));
+        newSelectedAnnotation.isEditing = isEnteringEditMode;
+
+        setSelectedAnnotation(newSelectedAnnotation);
+        setIsEditMode(prev => !prev);
     };
 
     const handleVoteSubmit = async (voteValue) => {
@@ -186,9 +202,9 @@ const AnnotationTab = () => {
             {error && <p className="error-text">{error}</p>}
 
             <div className="tab-actions">
-                {canEdit && <button onClick={() => setIsEditMode(prev => !prev)}>{isEditMode ? 'Cancel' : 'Edit'}</button>}
+                {(canEdit && !selectedAnnotation.isNew) && <button onClick={handleSwitchEditMode}>{isEditMode ? 'Cancel' : 'Edit'}</button>}
 
-                {canEdit && (
+                {(canEdit && !selectedAnnotation.isNew) && (
                     <button 
                         className="action-btn delete" 
                         onClick={() => setIsConfirmModalOpen(true)}

@@ -36,7 +36,7 @@ const Controls = ({ isDrawingMode, onToggleDrawingMode, permissions }) => {
 const ScrollAnnotationPage = () => {
     const { annotations, setAnnotations } = useAnnotationContext();
 
-    const { openPanel } = usePanel();
+    const { openPanel, selectedAnnotation, setSelectedAnnotation } = usePanel();
     const { token, userInfo } = useAuthContext();
     const { scrollId } = useParams();
     const navigate = useNavigate();
@@ -51,8 +51,14 @@ const ScrollAnnotationPage = () => {
     const [isDrawingMode, setIsDrawingMode] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false); // Tracks if mouse is currently down
     const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
+    const [isResizing, setIsResizing] = useState(false);
+    const [resizeHandle, setResizeHandle] = useState(null);
     const [newBox, setNewBox] = useState(null);
     const canvasRef = useRef(null); // Ref to the image wrapper for coordinates
+
+    const MIN_BOX_SIZE = 10
+
+    const isEditingAnnotation = (selectedAnnotation && selectedAnnotation.isEditing);
 
     const handleMouseDown = () => {setMouseDown(true);}
     const handleMouseUp = () => {setMouseDown(false);}
@@ -102,9 +108,73 @@ const ScrollAnnotationPage = () => {
 
     }, [scrollId, token, setAnnotations]);
 
+    const handleBoxMouseDown = (e, handle) => {
+        e.stopPropagation();
+        
+        setIsResizing(true);
+        setResizeHandle(handle);
+        setStartPoint({ x: e.clientX, y: e.clientY }); // Store initial screen coordinates
+    };
+
+    const handleDrawMouseMove = (e) => {
+        if (!canvasRef.current) return;
+
+        if (isDrawing) {
+            const { scale, positionX, positionY } = transformState;
+            const rect = canvasRef.current.getBoundingClientRect();
+            
+            const currentX = (e.clientX - rect.left - positionX) / scale;
+            const currentY = (e.clientY - rect.top - positionY) / scale;
+
+            setNewBox({
+                x: Math.min(startPoint.x, currentX),
+                y: Math.min(startPoint.y, currentY),
+                width: Math.abs(currentX - startPoint.x),
+                height: Math.abs(currentY - startPoint.y),
+            });
+        } else if (isResizing) {
+            // Logic for resizing an existing box
+            const dx = e.clientX - startPoint.x;
+            const dy = e.clientY - startPoint.y;
+            
+            const currentBox = (newBox && !isEditingAnnotation) ? newBox : selectedAnnotation.basic_info.coordinates
+
+            if (!currentBox) return;
+
+            let { x, y, width, height } = currentBox;
+
+            // Adjust dimensions based on which handle is being dragged
+            // not letting the box width and height become too small
+            if (resizeHandle.includes('right') && width + dx > MIN_BOX_SIZE) {
+                width += dx;
+            }
+            if (resizeHandle.includes('left') && dx < width - MIN_BOX_SIZE) {
+                x += dx;
+                width -= dx;
+            }
+            if (resizeHandle.includes('bottom') && height + dy > MIN_BOX_SIZE) {
+                height += dy;
+            }
+            if (resizeHandle.includes('top') && dy < height - MIN_BOX_SIZE) {
+                y += dy;
+                height -= dy;
+            }
+            
+            // Update the box state and reset the start point for the next move event
+            if (newBox && !isEditingAnnotation)
+                setNewBox({ x, y, width, height });
+            else{
+                selectedAnnotation.basic_info.coordinates = { x, y, width, height }
+                setSelectedAnnotation(selectedAnnotation);
+            }
+
+            setStartPoint({ x: e.clientX, y: e.clientY });
+        }
+    };
+
     // Mouse Handlers for Drawing
     const handleDrawMouseDown = (e) => {
-        if (!isDrawingMode || !canvasRef.current) return;
+        if (isResizing || !isDrawingMode || !canvasRef.current) return;
     
         e.stopPropagation(); // Stop pan-pinch from activating
         
@@ -114,27 +184,10 @@ const ScrollAnnotationPage = () => {
         // Calculate mouse position relative to the scaled and panned image
         const x = (e.clientX - rect.left - positionX) / scale;
         const y = (e.clientY - rect.top - positionY) / scale;
-
+        
         setIsDrawing(true);
         setStartPoint({ x, y });
         setNewBox({ x, y, width: 0, height: 0 });
-    };
-
-    const handleDrawMouseMove = (e) => {
-        if (!isDrawing || !canvasRef.current) return;
-
-        const { scale, positionX, positionY } = transformState;
-        const rect = canvasRef.current.getBoundingClientRect();
-        
-        const currentX = (e.clientX - rect.left - positionX) / scale;
-        const currentY = (e.clientY - rect.top - positionY) / scale;
-
-        setNewBox({
-            x: Math.min(startPoint.x, currentX),
-            y: Math.min(startPoint.y, currentY),
-            width: Math.abs(currentX - startPoint.x),
-            height: Math.abs(currentY - startPoint.y),
-        });
     };
 
     const boxToAnnotation = (box) => {
@@ -149,19 +202,27 @@ const ScrollAnnotationPage = () => {
         };
     }
     const handleDrawMouseUp = () => {
-        if (!isDrawing) return;
-        setIsDrawing(false);
-        
-        if (newBox && newBox.width > .001 && newBox.height > .001) {
+        if (isDrawing) {
+            if (!isDrawing) return;
+            setIsDrawing(false);
             
-            openPanel('annotation', boxToAnnotation(newBox));
-        } else
-            setNewBox(null)
+            if (newBox && newBox.width > MIN_BOX_SIZE && newBox.height > MIN_BOX_SIZE) {
+                
+                openPanel('annotation', boxToAnnotation(newBox));
+            } else
+                setNewBox(null)
+        }
+
+        if (isResizing) {
+            setIsResizing(false);
+            setResizeHandle(null);
+        }
     };
   
     // Handler for the button in the controls
     const toggleDrawingMode = () => {
         setIsDrawingMode(prev => !prev);
+        openPanel("users", null)
         setNewBox(null);
     };
 
@@ -202,11 +263,16 @@ const ScrollAnnotationPage = () => {
                                 
                                 {/* Map over the annotations and render a box for each one */}
                                 {annotations.map(annotation => (
-                                    <AnnotationBox key={annotation.regionId} annotation={annotation} isDisabled={isDrawingMode} />
+                                    <AnnotationBox 
+                                        key={annotation.regionId}
+                                        annotation={(isEditingAnnotation && selectedAnnotation.regionId === annotation.regionId) ? selectedAnnotation : annotation}
+                                        isDisabled={isDrawingMode} 
+                                        isDrawing={(isEditingAnnotation && selectedAnnotation.regionId === annotation.regionId)}
+                                        onHandleMouseDown={handleBoxMouseDown} />
                                 ))}
 
                             
-                                {newBox && <AnnotationBox annotation={boxToAnnotation(newBox)} isDrawing={true} />}
+                                {(newBox && !isEditingAnnotation) && <AnnotationBox annotation={boxToAnnotation(newBox)} isDrawing={true} onHandleMouseDown={handleBoxMouseDown} />}
                             </div>
                         </TransformComponent>
                     </>
