@@ -1,0 +1,44 @@
+name: Frontend CI/CD Pipeline
+
+# TRIGGERS
+on:
+  push:
+    branches:
+      - main
+  # Allow manual runs for testing
+  workflow_dispatch:
+
+# JOBS
+jobs:
+  build-and-deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm' # Cache npm dependencies for faster builds
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          # Use the deploy key for authentication
+          deploy_key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
+          # The folder the action should deploy.
+          publish_dir: ./build
+          # Commit user info for the gh-pages branch
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          # The commit message
+          commit_message: Automatic deployment to GitHub Pages
