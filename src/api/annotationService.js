@@ -1,0 +1,133 @@
+import { API_URL } from '../config/apiSettings';
+
+/**
+ * Fetches all annotation regions for a given scroll.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll.
+ * @returns {Promise<object>} - The full RegionUpdateResponse object from the API.
+ */
+export const getScrollRegions = async (token, scrollId) => {
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to fetch annotations.');
+    }
+
+    return response.json();
+};
+
+/**
+ * Creates a new annotation region on a scroll.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll to add the annotation to.
+ * @param {object} annotationData - The data for the new annotation (NewBoxRegion DTO).
+ *   Should have the shape: { coordinates: {...}, transcription: "..." }
+ * @returns {Promise<object>} - The newly created BoxRegion object from the server.
+ */
+export const createAnnotation = async (token, scrollId, annotationData) => {
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json', // Tell the server we're sending JSON
+        },
+        // Convert the JavaScript object to a JSON string for the request body
+        body: JSON.stringify(annotationData),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to create annotation.');
+    }
+
+    // A successful POST (201 Created) returns the full new resource
+    return response.json();
+};
+
+/**
+ * Deletes an annotation region from a scroll.
+ * @param {string} scrollId - The ID of the scroll containing the annotation.
+ * @param {string} regionId - The UUID of the annotation region to delete.
+ * @returns {Promise<void>} - A promise that resolves when the deletion is successful.
+ */
+export const deleteAnnotation = async (token, scrollId, regionId) => {
+    // Construct the correct endpoint URL
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions/${regionId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to delete annotation.');
+    }
+    
+    return;
+};
+
+/**
+ * Updates an existing annotation region.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll containing the annotation.
+ * @param {string} regionId - The UUID of the annotation region to update.
+ * @param {object} annotationData - The data for the annotation update (NewBoxRegion DTO).
+ *   Should have the shape: { coordinates: {...}, transcription: "..." }
+ * @returns {Promise<object>} - The updated BoxRegion object from the server.
+ */
+export const updateAnnotation = async (token, scrollId, regionId, annotationData) => {
+    // Construct the correct endpoint URL for a specific region
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions/${regionId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        // The body contains the updated transcription and coordinates
+        body: JSON.stringify(annotationData),
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update annotation.');
+    }
+
+    return response.json();
+};
+
+/**
+ * Casts a vote on the certainty of an annotation region.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} scrollId - The ID of the scroll containing the annotation.
+ * @param {string} regionId - The UUID of the annotation region to vote on.
+ * @param {object} voteData - The user's vote. Should have the shape: { vote: number }
+ * @returns {Promise<object>} - The updated BoxRegion object from the server, with the new certaintyScore.
+ */
+export const voteOnRegion = async (token, scrollId, regionId, voteData) => {
+    // Construct the correct endpoint URL for voting on a specific region
+    const response = await fetch(`${API_URL}/scrolls/${scrollId}/regions/${regionId}/vote`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        // The body contains the vote value, serialized to JSON
+        body: JSON.stringify(voteData),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to cast vote.');
+    }
+
+    // A successful POST for a vote returns the updated BoxRegion resource
+    return response.json();
+};

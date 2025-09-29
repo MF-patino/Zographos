@@ -144,3 +144,26 @@ export const getAllUsers = async (token, index = 0) => {
 
     return response.json();
 };
+
+/**
+ * Fetches the complete user information from their username.
+ * @param {string} token - The JWT authentication token.
+ * @param {string} username - The username of the user to update.
+ * @returns {Promise<Array>} - A promise that resolves to a list of UserInfo DTOs.
+ */
+export const getUserInfo = async (token, username) => {
+    const response = await fetch(`${API_URL}/user/` + username, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Could not retrieve user info.');
+    }
+
+    return response.json();
+};

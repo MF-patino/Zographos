@@ -1,0 +1,121 @@
+/* --- Main container for the tab content --- */
+.annotation-tab {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between the main sections */
+}
+
+.annotation-tab h3 {
+    margin: 0 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    color: #333;
+}
+
+/* --- General styling for a detail group (Label + Value) --- */
+.detail-group {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between the label (strong) and the content */
+}
+
+.detail-group strong {
+    color: #555;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+/* --- Specific styling for the author link button --- */
+.detail-group .user-link {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: #007bff;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.detail-group .user-link:hover {
+    text-decoration: underline;
+}
+
+.detail-group .user-link:disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+/* --- Styling for the Transcription section --- */
+.transcription-text {
+    background-color: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    width: 90%;
+    padding: 10px;
+    margin: 0;
+    white-space: pre-wrap; /* Preserve line breaks */
+    word-break: break-word; /* Break long words */
+}
+
+/* Styling for the textarea when in edit mode */
+.annotation-tab textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical; /* Allow user to resize it vertically */
+    box-sizing: border-box; /* Important for padding and width */
+}
+
+/* Action buttons at the bottom of the tab */
+.tab-actions {
+    margin-top: auto; /* Pushes this section to the bottom */
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 10px;
+}
+
+/* General button styling, you can reuse this from other components */
+.tab-actions button,
+.annotation-tab form button[type="submit"] {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #007bff;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tab-actions button {
+    background-color: #6c757d; /* A different color for non-submit actions */
+    border-color: #6c757d;
+}
+
+/* --- Placeholder for when no annotation is selected --- */
+.tab-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+}
+
+.error-text {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}

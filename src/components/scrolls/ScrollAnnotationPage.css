@@ -1,5 +1,7 @@
-.scroll-detail-page {
-    padding: 20px 40px;
+.scroll-annotation-page {
+    position: fixed;
+    height: 100%;
+    overflow: hidden;
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -9,52 +11,101 @@
 }
 
 .detail-header {
+    /* Take the header out of the normal document flow to overlap the scroll image */
+    position: absolute;
+    
+    top: 0;
+    left: 0;
+    width: 100%; /* Make it span the full width */
+    
+    /* Set a z-index to ensure it sits on top of the canvas */
+    z-index: 10;
+    
+    background-color: rgba(40, 44, 52, 0.7); /* A semi-transparent version of your dark color */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* A subtle bottom border */
+    color: white; /* Make the text white so it's readable */
+    
+    /* These styles remain the same */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
+    padding: 5px 20px;
+    box-sizing: border-box; /* Important when using width: 100% and padding */
 }
 
 .detail-header h2 {
     margin: 0;
+    color: white; /* Ensure the h2 text is also white */
 }
 
-.back-button, .delete-button {
-    padding: 8px 15px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #f8f9fa;
+.detail-header .back-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
     cursor: pointer;
     font-weight: bold;
+    border-radius: 5px;
+    padding: 8px 15px;
+}
+.detail-header .back-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-.delete-button {
-    background-color: #dc3545;
-    color: white;
-    border-color: #dc3545;
-}
-
-.delete-button:disabled {
-    background-color: #f8d7da;
-    cursor: not-allowed;
-}
-
-.image-container {
+.canvas-container {
     width: 100%;
-    background-color: #1a1a1a; /* Dark background for the image */
+    height: 100%;
+    background-color: #1a1a1a; /* Dark background for the canvas */
     text-align: center;
-    padding: 20px;
     box-sizing: border-box;
 }
 
-.image-container img {
-    max-width: 100%;
-    height: auto;
+.canvas-content img {
+    position: absolute;
 }
 
-.error-text.detail-error {
-    text-align: center;
-    margin-bottom: 15px;
+/* --- Styles for the Zoom Controls --- */
+.zoom-controls {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.zoom-controls button {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.zoom-controls button:last-child {
+    border-bottom: none;
+}
+.zoom-controls button:hover {
+    background-color: #f0f0f0;
+}
+
+
+.loading-text, .error-text {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.2rem;
+}
+.error-text {
+    color: #ff8a80;
+}
+
+.zoom-controls button.active {
+    background-color: #007bff;
+    color: white;
 }

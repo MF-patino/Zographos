@@ -1,0 +1,69 @@
+.annotation-box {
+    position: absolute;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.5s ease;
+}
+.annotation-box.disabled,
+.annotation-box.drawing {
+    /* Make the box non-interactive. */
+    pointer-events: none;
+}
+.annotation-box.disabled{
+    /* Visually de-emphasize the boxes to show they are inactive.
+       A lower opacity is a great way to do this. */
+    opacity: 0.7;
+}
+
+.annotation-box:not(.disabled):not(.drawing):hover {
+    background-color: rgba(255, 215, 0, 0.2);
+}
+
+/* Style for the box as it's being drawn */
+.annotation-box.drawing {
+    position: absolute;
+    border-style: dashed;
+    border-color: rgba(255, 82, 82, 0.9); /* A bright red */
+    box-shadow: none;
+    background-color: rgba(255, 82, 82, 0.2);
+}
+
+.resize-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border: 2px solid #007bff;
+    border-radius: 50%; /* Make them circles */
+    pointer-events: all; /* Allow pointer events for all the handles */
+    
+    /* Center the handle on the corner using transform */
+    transform: translate(-50%, -50%);
+}
+
+
+/* Position each handle */
+.resize-handle.top-left {
+    top: 0;
+    left: 0;
+    cursor: nwse-resize; /* Diagonal resize cursor */
+}
+.resize-handle.top-right {
+    top: 0;
+    right: 0;
+    cursor: nesw-resize;
+    transform: translate(50%, -50%); /* Adjust transform for right/bottom corner */
+}
+.resize-handle.bottom-left {
+    bottom: 0;
+    left: 0;
+    cursor: nesw-resize;
+    transform: translate(-50%, 50%);
+}
+.resize-handle.bottom-right {
+    bottom: 0;
+    right: 0;
+    cursor: nwse-resize;
+    transform: translate(50%, 50%);
+}

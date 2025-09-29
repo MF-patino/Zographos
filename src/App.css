@@ -1,7 +1,16 @@
 .App {
+  /* Use flexbox to control the main layout */
+  display: flex;
+  flex-direction: column; /* Stack children vertically (Header on top of Main) */
+  height: 100%; /* Make the App container take up the full height of its parent (#root) */
   text-align: center;
 }
 
-.App-link {
-  color: #61dafb;
+/* 
+  The <main> element will automatically fill all available
+  vertical space between the header and the bottom of the screen.
+*/
+.App-main {
+  flex-grow: 1;
+  overflow-y: auto; /* Allow the main content area to scroll if needed */
 }

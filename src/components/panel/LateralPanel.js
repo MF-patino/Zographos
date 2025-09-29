@@ -2,10 +2,11 @@ import React from 'react';
 import { usePanel } from './PanelContext';
 import UserListTab from './UserListTab';
 import { FaChevronLeft } from 'react-icons/fa'; 
+import AnnotationTab from './AnnotationTab';
 import './LateralPanel.css';
 
 const LateralPanel = () => {
-    const { isPanelOpen, closePanel, togglePanel } = usePanel();
+    const { isPanelOpen, closePanel, togglePanel, activeTab, selectedAnnotation, openPanel } = usePanel();
 
     // Conditionally build the className string
     const panelClasses = `lateral-panel ${isPanelOpen ? 'open' : ''}`;
@@ -23,14 +24,16 @@ const LateralPanel = () => {
                 </button>
 
                 <div className="panel-tabs">
-                    {/* Add tab buttons here later */}
-                    <button className="tab-btn active">Users</button>
-                    {/*<button className="tab-btn" disabled>Annotation Details</button>*/}
+                    <button className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} onClick={() => openPanel("users", selectedAnnotation)}>Users</button>
+                    <button className={`tab-btn ${activeTab === 'annotation' ? 'active' : ''}`} onClick={() => openPanel("annotation", selectedAnnotation)} disabled={!selectedAnnotation}>
+                        Annotation Details
+                    </button>
                     <button onClick={closePanel} className="panel-close-btn">&times;</button>
                 </div>
                 <div className="panel-content">
-                    {/* For now, we only show the user list tab */}
-                    <UserListTab />
+                    {/* Conditional Tab Rendering */}
+                    {activeTab === 'users' && <UserListTab />}
+                    {activeTab === 'annotation' && <AnnotationTab />}
                 </div>
             </div>
         </>
