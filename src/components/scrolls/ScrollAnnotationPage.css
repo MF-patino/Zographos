@@ -11,24 +11,44 @@
 }
 
 .detail-header {
+    /* Take the header out of the normal document flow to overlap the scroll image */
+    position: absolute;
+    
+    top: 0;
+    left: 0;
+    width: 100%; /* Make it span the full width */
+    
+    /* Set a z-index to ensure it sits on top of the canvas */
+    z-index: 10;
+    
+    background-color: rgba(40, 44, 52, 0.7); /* A semi-transparent version of your dark color */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* A subtle bottom border */
+    color: white; /* Make the text white so it's readable */
+    
+    /* These styles remain the same */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    border-bottom: 1px solid #eee;
+    padding: 5px 20px;
+    box-sizing: border-box; /* Important when using width: 100% and padding */
 }
 
 .detail-header h2 {
     margin: 0;
+    color: white; /* Ensure the h2 text is also white */
 }
 
-.back-button {
-    padding: 8px 15px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #f8f9fa;
+.detail-header .back-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
     cursor: pointer;
     font-weight: bold;
+    border-radius: 5px;
+    padding: 8px 15px;
+}
+.detail-header .back-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .canvas-container {

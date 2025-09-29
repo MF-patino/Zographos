@@ -206,10 +206,9 @@ const ScrollAnnotationPage = () => {
             if (!isDrawing) return;
             setIsDrawing(false);
             
-            if (newBox && newBox.width > MIN_BOX_SIZE && newBox.height > MIN_BOX_SIZE) {
-                
+            if (newBox && newBox.width > MIN_BOX_SIZE && newBox.height > MIN_BOX_SIZE)
                 openPanel('annotation', boxToAnnotation(newBox));
-            } else
+            else
                 setNewBox(null)
         }
 
