@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/Zographos/static/css/main.e9ee07e2.css",
-    "main.js": "/Zographos/static/js/main.8ed9eefe.js",
+    "main.js": "/Zographos/static/js/main.3026b1be.js",
     "static/js/206.81c4e08f.chunk.js": "/Zographos/static/js/206.81c4e08f.chunk.js",
     "index.html": "/Zographos/index.html"
   },
   "entrypoints": [
     "static/css/main.e9ee07e2.css",
-    "static/js/main.8ed9eefe.js"
+    "static/js/main.3026b1be.js"
   ]
 }
