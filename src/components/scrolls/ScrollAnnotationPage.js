@@ -91,7 +91,10 @@ const ScrollAnnotationPage = () => {
                 setImageUrl(objectUrl);
 
             } catch (err) {
-                setError(err.message || 'Could not load scroll image.');
+                var finalError = ''
+                try {finalError = JSON.parse(err.message)} catch { finalError = err }
+                
+                setError(finalError.message || 'Could not load scroll image.');
             } finally {
                 setIsLoading(false);
             }

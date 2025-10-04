@@ -84,7 +84,10 @@ const ProfileOverlay = ({ isOpen, onClose, otherUserInfo=null }) => {
             else
                 onClose();
         } catch (err) {
-            setError(err.message || 'Failed to delete account.');
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            
+            setError(finalError.message || 'Failed to delete account.');
         } finally {
             setIsDeleting(false);
             setIsConfirmModalOpen(false);

@@ -99,7 +99,10 @@ const ManageScrollForm = ({ isOpen, onClose, onScrollAdded, onScrollUpdated, onS
             }
             onClose(); // Close the modal on success
         } catch (err) {
-            setError(err.message || 'An unexpected error occurred.');
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            
+            setError(finalError.message || 'An unexpected error occurred.');
         } finally {
             setIsLoading(false);
         }
