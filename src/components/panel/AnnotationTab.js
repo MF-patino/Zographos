@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import * as userService from '../../api/userService';
 import * as annotationService from '../../api/annotationService';
 import { usePanel } from '../panel/PanelContext';
@@ -27,7 +27,8 @@ const AnnotationTab = () => {
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
 
-    const { scrollId } = useParams(); // Get the current scrollId
+    const { scrollId, annotationId } = useParams(); // Get the current scrollId
+    const navigate = useNavigate();
 
     // Handlers to open and close the overlay
     const openOverlay = async () => {
@@ -62,7 +63,7 @@ const AnnotationTab = () => {
             
             deleteAnnotation(selectedAnnotation.regionId)
             setSelectedAnnotation(null)
-            openPanel("users", null)
+            navigate(`/scrolls/${scrollId}/`);
         } catch (err) {
             var finalError = ''
             try {finalError = JSON.parse(err.message)} catch { finalError = err }
@@ -85,9 +86,12 @@ const AnnotationTab = () => {
             // Default to view mode unless user is creating a new annotation 
             // or already editing this annotation
             setIsEditMode(selectedAnnotation.isNew || selectedAnnotation.isEditing);
-        }
+        } else if (!annotationId)
+            // If we are not inspecting an annotation, open the users tab
+            openPanel('users')
+
         setError(null);
-    }, [selectedAnnotation]);
+    }, [selectedAnnotation, openPanel, annotationId]);
 
     if (!selectedAnnotation) {
         return <div className="tab-placeholder">Select an annotation to view its details.</div>;
@@ -116,6 +120,7 @@ const AnnotationTab = () => {
             if (!!selectedAnnotation.isNew){
                 result = await annotationService.createAnnotation(token, scrollId, newAnnotationData)
                 addAnnotation(result)
+                navigate(`/scrolls/${scrollId}/${result.regionId}`);
             }
             else{
                 result = await annotationService.updateAnnotation(token, scrollId, selectedAnnotation.regionId, newAnnotationData);

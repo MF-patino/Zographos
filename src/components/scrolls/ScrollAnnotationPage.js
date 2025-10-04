@@ -38,7 +38,7 @@ const ScrollAnnotationPage = () => {
 
     const { openPanel, selectedAnnotation, setSelectedAnnotation } = usePanel();
     const { token, userInfo } = useAuthContext();
-    const { scrollId } = useParams();
+    const { scrollId, annotationId } = useParams();
     const navigate = useNavigate();
 
     const [imageUrl, setImageUrl] = useState(null);
@@ -111,6 +111,17 @@ const ScrollAnnotationPage = () => {
 
     }, [scrollId, token, setAnnotations]);
 
+    // Effect to open the annotation requested in the URL
+    useEffect(() => {
+        if (annotationId) {
+            // If there's an annotationId in the URL, find it in our list
+            const foundAnnotation = annotations.find(anno => anno.regionId === annotationId);
+            if (foundAnnotation)
+                // If found, store this annotation's details
+                setSelectedAnnotation(foundAnnotation);
+        }
+    }, [annotationId, annotations, setSelectedAnnotation]); // Rerun this logic if any of these change
+
     const handleBoxMouseDown = (e, handle) => {
         e.stopPropagation();
         
@@ -181,6 +192,13 @@ const ScrollAnnotationPage = () => {
     
         e.stopPropagation(); // Stop pan-pinch from activating
         
+        // If we draw another annotation after just creating one,
+        // deselect the current one
+        if (selectedAnnotation){
+            setSelectedAnnotation(null)
+            navigate(`/scrolls/${scrollId}/`);
+        }
+        
         const { scale, positionX, positionY } = transformState;
         const rect = canvasRef.current.getBoundingClientRect();
 
@@ -204,6 +222,7 @@ const ScrollAnnotationPage = () => {
             },
         };
     }
+    
     const handleDrawMouseUp = () => {
         if (isDrawing) {
             if (!isDrawing) return;
@@ -224,8 +243,11 @@ const ScrollAnnotationPage = () => {
     // Handler for the button in the controls
     const toggleDrawingMode = () => {
         setIsDrawingMode(prev => !prev);
-        openPanel("users", null)
         setNewBox(null);
+
+        // Deselect the currently selected annotation
+        setSelectedAnnotation(null)
+        navigate(`/scrolls/${scrollId}/`);
     };
 
     const handleBack = () => {

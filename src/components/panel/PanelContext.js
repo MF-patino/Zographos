@@ -5,7 +5,7 @@ const PanelContext = createContext(null);
 export const PanelProvider = ({ children }) => {
     const [isPanelOpen, setIsPanelOpen] = useState(true);
 
-    const [activeTab, setActiveTab] = useState('users'); // 'users' or 'annotation'
+    const [activeTab, setActiveTab] = useState('annotation'); // 'users' or 'annotation'
     const [selectedAnnotation, setSelectedAnnotation] = useState(null);
 
     const openPanel = (tab = 'users', annotation = null) => {

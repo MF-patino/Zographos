@@ -1,13 +1,16 @@
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { usePanel } from '../panel/PanelContext';
 import "./AnnotationBox.css"
 
 const AnnotationBox = ({ annotation, isDisabled = false, isDrawing = false, onHandleMouseDown }) => {
+    const navigate = useNavigate();
+    const { scrollId } = useParams();
     const { openPanel } = usePanel();
 
     const handleClick = () => {
-        // When clicked, open the panel to the 'annotation' tab
-        // and set this as the selected annotation.
+        // When clicked, navigate to the URL for this specific annotation
+        navigate(`/scrolls/${scrollId}/${annotation.regionId}`);
         openPanel('annotation', annotation);
     };
 
