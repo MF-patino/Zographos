@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
+    const [isAuthLoading, setIsAuthLoading] = useState(true); 
 
     // On initial load, try to get data from localStorage
     useEffect(() => {
@@ -17,6 +18,9 @@ export const AuthProvider = ({ children }) => {
             setToken(storedToken);
             setUserInfo(JSON.parse(storedUserInfo));
         }
+
+        // Whether we found a token in localStorage or not loading is complete.
+        setIsAuthLoading(false);
     }, []); // Empty dependency array, runs only once on mount
 
     // Functions of the AuthContext
@@ -46,7 +50,9 @@ export const AuthProvider = ({ children }) => {
         deleteLoginInfo,
     };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    // Do not render children unless authentication info has loaded in 
+    // As this is a fast localStorage retrieval a loading screen is not needed
+    return isAuthLoading ? null : <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Create a custom hook for context consumption

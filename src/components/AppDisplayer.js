@@ -21,7 +21,7 @@ export default function AppDisplayer() {
                     userInfo ? <><LateralPanel /><ScrollPage /></> : <Navigate to="/" />
                 } />
                 
-                <Route path="/scrolls/:scrollId" element={
+                <Route path="/scrolls/:scrollId/:annotationId?" element={
                     userInfo ? <><LateralPanel /><ScrollAnnotationPage /></> : <Navigate to="/" />
                 } />
                 

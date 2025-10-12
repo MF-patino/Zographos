@@ -35,7 +35,10 @@ const UserListTab = () => {
             }
             setUsers(prev => (index === 0 ? newUsers : [...prev, ...newUsers]));
         } catch (err) {
-            setError(err.message);
+            var finalError = ''
+            try {finalError = JSON.parse(err.message)} catch { finalError = err }
+            
+            setError(finalError.message || 'An error occurred while fetching users.');
         } finally {
             setIsLoading(false);
         }
