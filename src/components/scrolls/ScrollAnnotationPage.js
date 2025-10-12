@@ -251,6 +251,7 @@ const ScrollAnnotationPage = () => {
     };
 
     const handleBack = () => {
+        setSelectedAnnotation(null);
         navigate('/scrolls');
     };
 
