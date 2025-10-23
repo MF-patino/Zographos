@@ -8,6 +8,7 @@ import { useAnnotationContext } from '../annotations/AnnotationContext';
 import ProfileOverlay from '../profile/ProfileOverlay';
 import StarRating from '../annotations/StarRating';
 import ConfirmationModal from '../common/ConfirmationModal';
+import CommentSection from './CommentSection'; 
 import ReactDOM from 'react-dom';
 import './AnnotationTab.css';
 
@@ -219,6 +220,11 @@ const AnnotationTab = () => {
                     </button>
                 )}
             </div>
+
+            <CommentSection 
+                scrollId={scrollId} 
+                regionId={selectedAnnotation.regionId}
+            />
 
             <ProfileOverlay isOpen={isOverlayOpen} onClose={closeOverlay} otherUserInfo={selectedUser} />
 
