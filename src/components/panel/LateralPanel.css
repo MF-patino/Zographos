@@ -3,7 +3,7 @@
     top: var(--logged-header-height);
     right: 0;
     width: 350px;
-    height: 100vh;
+    height: calc(100vh - var(--logged-header-height));
     background-color: white;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
     transform: translateX(100%); /* Start off-screen */
